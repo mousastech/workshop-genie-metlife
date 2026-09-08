@@ -62,15 +62,68 @@ function KPIs(){
 }
 
 const stColor={'Em análise':'#FFA600','Concluída':'#8CC63F','Aberta':'#0090DA'};
+function criterios(r){
+  const dde=Number(r.dias_desde_emissao), val=Number(r.valor_reclamado), dl=Number(r.dias_liquidacao||0);
+  return [
+    {flag:dde<180, txt:`Ocorrência ${dde} dias após a emissão da apólice`, exp:'Sinistro cedo demais (< 180 dias) é forte indício de fraude oportunista.'},
+    {flag:val>500000, txt:`Valor reclamado ${brl(val)}`, exp:'Valor acima do padrão (> R$ 500 mil) eleva o risco e o impacto.'},
+    {flag:r.nivel_risco==='Alto', txt:`Score do modelo ${r.score_fraude}/100 — risco ${r.nivel_risco}`, exp:'Score do modelo metlife-fraude (Model Serving + AI Gateway).'},
+    {flag:dl>90, txt:`Tempo de liquidação ${dl} dias`, exp:'Liquidação atípica pode indicar disputa/documentação inconsistente.'},
+  ];
+}
+function Analise({r, ana, onInvestigar, onDecidir, statusObj}){
+  const crit=criterios(r);
+  const flags=crit.filter(c=>c.flag).length;
+  const mv=ana&&ana.verdict; const mvFraude=(mv==1||mv==='1');
+  const suspeito = flags>=2 || mvFraude;
+  return <div style={{background:'#f6fafe',border:'1px solid #d6ecfa',borderRadius:12,padding:16,margin:'6px 0'}}>
+    <div style={{display:'flex',justifyContent:'space-between',flexWrap:'wrap',gap:8}}>
+      <b style={{color:'#002B5C'}}>🔎 Análise do sinistro {r.numero_sinistro} — {r.tipo_sinistro} · {r.linha_negocio} · {r.regiao}</b>
+      <span className="badge" style={{background:suspeito?'#FF7E5C':'#8CC63F'}}>
+        {suspeito?'⚠️ Recomendado INVESTIGAR':'✅ Baixa suspeita'}
+      </span>
+    </div>
+    <div style={{margin:'10px 0',fontSize:13.5}}>
+      <b>Passo 1 · Modelo ao vivo:</b> {ana?(ana.loading?'consultando endpoint…':(mvFraude?'⚠️ Classificou como FRAUDE (1)':'✅ Classificou como LEGÍTIMO (0)')):'—'}
+    </div>
+    <div style={{fontSize:13.5,marginBottom:6}}><b>Passo 2 · Critérios de risco:</b></div>
+    <ul style={{margin:'0 0 10px 0',padding:0,listStyle:'none'}}>
+      {crit.map((c,i)=><li key={i} style={{margin:'5px 0'}}>
+        <span style={{marginRight:8}}>{c.flag?'⚠️':'✓'}</span>
+        <b style={{color:c.flag?'#c0432a':'#1f6b3a'}}>{c.txt}</b>
+        <div style={{color:'#5b6b80',fontSize:12,marginLeft:26}}>{c.exp}</div>
+      </li>)}
+    </ul>
+    <div style={{fontSize:13.5,marginBottom:10}}>
+      <b>Passo 3 · Motivo do alerta:</b> {r.motivo_alerta_principal||'—'} &nbsp;·&nbsp;
+      <b>Veredito:</b> {flags} de 4 critérios sinalizados{mvFraude?' + modelo indica fraude':''} → {suspeito?'seguir com investigação (SLA 72h).':'provável legítimo; pode aprovar.'}
+    </div>
+    <div style={{whiteSpace:'nowrap'}}>
+      {(!statusObj||statusObj.status!=='Em análise')&&<button className="btn btn-p" onClick={onInvestigar}>Abrir investigação (SLA 72h)</button>}
+      {statusObj&&statusObj.status==='Em análise'&&<span>
+        <button className="btn btn-p" style={{background:'#FF7E5C'}} onClick={()=>onDecidir('Fraude confirmada')}>Confirmar fraude</button>{' '}
+        <button className="btn btn-g" onClick={()=>onDecidir('Legítimo')}>Marcar legítimo</button>
+      </span>}
+    </div>
+  </div>;
+}
 function FastClaims({toast}){
   const [rows,setRows]=useState(null);
   const [inv,setInv]=useState({});
+  const [open,setOpen]=useState(null);
+  const [ana,setAna]=useState({});
   const load=()=>{api('/api/claims').then(setRows);api('/api/investigacoes').then(d=>setInv(d&&!d.error?d:{}));};
   useEffect(load,[]);
   const feat=r=>({tipo_sinistro:r.tipo_sinistro,linha_negocio:r.linha_negocio,regiao:r.regiao,
     valor_reclamado:Number(r.valor_reclamado),dias_liquidacao:Number(r.dias_liquidacao||0),dias_desde_emissao:Number(r.dias_desde_emissao||0)});
   const post=(u,b)=>api(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
-  const reavaliar=r=>post('/api/score',feat(r)).then(x=>{const p=x.prediction; toast(`Modelo ao vivo · ${r.numero_sinistro}: ${(p==1||p==='1')?'⚠️ FRAUDE (1)':'✅ Legítimo (0)'}`);});
+  const analisar=r=>{
+    const k=r.numero_sinistro;
+    if(open===k){setOpen(null);return;}
+    setOpen(k);
+    if(ana[k]===undefined){setAna(a=>({...a,[k]:{loading:true}}));
+      post('/api/score',feat(r)).then(x=>setAna(a=>({...a,[k]:{verdict:x.prediction}}))).catch(()=>setAna(a=>({...a,[k]:{verdict:null}})));}
+  };
   const investigar=r=>post('/api/investigar',{referencia:r.numero_sinistro,tipo:r.tipo_sinistro,valor_reclamado:Number(r.valor_reclamado),score:r.score_fraude}).then(x=>{toast(`Caso ${r.numero_sinistro}: ${x.status||x.error} (SLA 72h)`);load();});
   const decidir=(r,d)=>post('/api/decisao',{referencia:r.numero_sinistro,tipo:r.tipo_sinistro,valor_reclamado:Number(r.valor_reclamado),score:r.score_fraude,desfecho:d}).then(x=>{toast(`Caso ${r.numero_sinistro}: ${x.status?d:x.error}`);load();});
   if(!rows) return <div className="muted">Carregando fila…</div>;
@@ -78,23 +131,22 @@ function FastClaims({toast}){
   const abertos=Object.values(inv).filter(v=>v.status==='Em análise').length;
   return <div className="card">
     <h2>🩺 Módulo 1 · Fast-Claims — triagem de fraude (alto risco)</h2>
-    <p className="sub">Score do modelo <b>metlife-fraude</b> (Model Serving + AI Gateway). <b>Reavaliar</b> chama o modelo ao vivo; <b>Investigar</b> abre caso (SLA 72h) no Lakebase; o desfecho vira rótulo p/ re-treino. Casos em análise: <b>{abertos}</b>.</p>
-    <table><thead><tr><th>Sinistro</th><th>Tipo</th><th>Região</th><th>Valor</th><th>Score</th><th>Risco</th><th>Status</th><th>Ações</th></tr></thead>
-    <tbody>{rows.map((r,i)=>{const s=inv[r.numero_sinistro];return <tr key={i}>
+    <p className="sub">Clique em <b>Investigar</b> para abrir a <b>análise passo a passo</b> (critérios + modelo ao vivo) e decidir. O desfecho vira rótulo para re-treino. Casos em análise: <b>{abertos}</b>.</p>
+    <table><thead><tr><th>Sinistro</th><th>Tipo</th><th>Região</th><th>Valor</th><th>Score</th><th>Risco</th><th>Status</th><th>Ação</th></tr></thead>
+    <tbody>{rows.map((r,i)=>{const s=inv[r.numero_sinistro];const isOpen=open===r.numero_sinistro;return <React.Fragment key={i}>
+      <tr>
       <td>{r.numero_sinistro}</td><td>{r.tipo_sinistro}</td><td>{r.regiao}</td>
       <td>{brl(r.valor_reclamado)}</td>
       <td><div className="bar"><span style={{width:r.score_fraude+'%'}}></span></div><small>{r.score_fraude}</small></td>
       <td><span className={'badge b-'+r.nivel_risco}>{r.nivel_risco}</span></td>
       <td>{s?<span className="badge" style={{background:stColor[s.status]||'#5b6b80'}}>{s.status}{s.desfecho?': '+s.desfecho:''}</span>:<span className="muted">—</span>}</td>
-      <td style={{whiteSpace:'nowrap'}}>
-        <button className="btn btn-g" onClick={()=>reavaliar(r)}>Reavaliar</button>{' '}
-        {(!s||s.status!=='Em análise')&&<button className="btn btn-p" onClick={()=>investigar(r)}>Investigar</button>}
-        {s&&s.status==='Em análise'&&<span>
-          <button className="btn btn-p" style={{background:'#FF7E5C'}} onClick={()=>decidir(r,'Fraude confirmada')}>Fraude</button>{' '}
-          <button className="btn btn-g" onClick={()=>decidir(r,'Legítimo')}>Legítimo</button>
-        </span>}
-      </td>
-    </tr>;})}</tbody></table>
+      <td><button className="btn btn-p" onClick={()=>analisar(r)}>{isOpen?'Fechar':'🔎 Investigar'}</button></td>
+      </tr>
+      {isOpen && <tr><td colSpan="8" style={{background:'transparent'}}>
+        <Analise r={r} ana={ana[r.numero_sinistro]} statusObj={s}
+          onInvestigar={()=>investigar(r)} onDecidir={(d)=>decidir(r,d)}/>
+      </td></tr>}
+    </React.Fragment>;})}</tbody></table>
   </div>;
 }
 
