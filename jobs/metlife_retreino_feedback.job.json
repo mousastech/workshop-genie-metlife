@@ -1,0 +1,16 @@
+{
+  "name": "metlife_retreino_feedback",
+  "description": "Fecha o ciclo MLOps: lê rótulos confirmados na investigação (Lakebase feedback), corrige os labels do Gold, re-treina o modelo de fraude e registra nova versão (@champion) no Unity Catalog.",
+  "tasks": [
+    {
+      "task_key": "retreinar_com_feedback",
+      "notebook_task": {"notebook_path": "/Workspace/Users/<voce>/workshop_metlife/MetLife_ML_Retreino_Feedback"},
+      "environment_key": "env"
+    }
+  ],
+  "environments": [
+    {"environment_key": "env", "spec": {"client": "2", "dependencies": ["scikit-learn", "mlflow", "psycopg[binary]"]}}
+  ],
+  "schedule": {"quartz_cron_expression": "0 0 3 ? * MON", "timezone_id": "America/Sao_Paulo", "pause_status": "PAUSED"},
+  "queue": {"enabled": true}
+}

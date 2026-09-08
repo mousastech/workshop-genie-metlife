@@ -40,3 +40,6 @@ SELECT * FROM moi_ai_catalog.metlife_workshop.apolices;
 
 ## Notas de ML (serverless)
 Ao registrar modelos **SparkML** em serverless, o MLflow exige um `dfs_tmpdir` em UC Volume e uma **model signature** (`infer_signature`). Ver `notebooks/metlife_ml_fraude_treino.py`.
+
+## Ciclo de feedback (MLOps) — `metlife_retreino_feedback`
+Fecha o loop humano→modelo: os desfechos das investigações (app OmniPulse → Lakebase `feedback`, 1=fraude/0=legítimo) **corrigem os rótulos** do Gold; o job re-treina o modelo (sklearn) e **registra nova versão** (`@champion`) no Unity Catalog. Notebook: `notebooks/metlife_ml_retreino_feedback.py`. Agenda semanal (seg 03h), PAUSED. Ambiente serverless instala `scikit-learn, mlflow, psycopg[binary]`. Lê o `feedback` direto do Lakebase via token OAuth (REST `/api/2.0/database/credentials`).
