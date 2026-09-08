@@ -1,8 +1,16 @@
 # Workshop AI/BI + Genie — MetLife
 
+![Databricks](https://img.shields.io/badge/Databricks-AI%2FBI%20%2B%20Genie-FF3621?logo=databricks&logoColor=white)
+![Genie Ontology](https://img.shields.io/badge/Genie-Ontology-1B3139)
+![Industry](https://img.shields.io/badge/Ind%C3%BAstria-Seguros-0072B2)
+![Language](https://img.shields.io/badge/SQL%20%C2%B7%20YAML%20%C2%B7%20Notebook-000000)
+![License](https://img.shields.io/badge/License-MIT-green)
+
 Kit completo e reproduzível de um **workshop prático de Databricks AI/BI + Genie** para a indústria de **seguros** (Vida & Previdência, Sinistros & Fraude, Distribuição & Corretores). Inclui dados sintéticos, camada semântica governada (Metric Views), Domain, glossário, dois Genie Spaces, um dashboard AI/BI e a base para o **Genie Ontology** — além de um notebook guiado estilo *Databricks Academy* e o roteiro da demo.
 
 > Workshop de referência: **17/09**, 9h–14h (1h de intervalo), público misto (negócio + dados). Dados 100% sintéticos, criados apenas para treinamento.
+
+📐 **Arquitetura e modelo de dados:** [`docs/arquitetura.md`](docs/arquitetura.md) (diagramas Mermaid).
 
 ---
 
