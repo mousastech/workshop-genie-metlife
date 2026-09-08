@@ -1,0 +1,23 @@
+{
+  "version": "v1",
+  "host": "https://fevm-moi-ai.cloud.databricks.com",
+  "remote_path": "/Workspace/Users/moises.santos@databricks.com/workshop_metlife/app_metlife_triagem",
+  "last_modified_times": {
+    "README.md": "2026-09-08T14:16:52.346194338-03:00",
+    "app.py": "2026-09-08T14:16:52.341183014-03:00",
+    "app.yaml": "2026-09-08T14:16:27.37458257-03:00",
+    "requirements.txt": "2026-09-08T14:16:52.335964363-03:00"
+  },
+  "local_to_remote_names": {
+    "README.md": "README.md",
+    "app.py": "app.py",
+    "app.yaml": "app.yaml",
+    "requirements.txt": "requirements.txt"
+  },
+  "remote_to_local_names": {
+    "README.md": "README.md",
+    "app.py": "app.py",
+    "app.yaml": "app.yaml",
+    "requirements.txt": "requirements.txt"
+  }
+}

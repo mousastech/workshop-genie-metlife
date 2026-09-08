@@ -20,3 +20,8 @@ Quando o app (ou o Genie) consome LLMs/modelos via **Model Serving**, configure 
 
 Ex.: publicar o modelo de fraude (`moi_ai_catalog.metlife_pipeline.modelo_fraude`) como endpoint
 `metlife-fraude` e aplicar AI Gateway — o app passa a consumir sob governança.
+
+## Ambiente de referência (ao vivo, fevm-moi-ai)
+- App: **metlife-triagem** — https://metlife-triagem-7474658545709121.aws.databricksapps.com (RUNNING)
+- Endpoint de Model Serving (modelo sklearn servível): **metlife-fraude** com **AI Gateway** (rate limit 60/min + inference tables `metlife_pipeline.fraude_ep_*` + usage tracking)
+- Modelo servível: `moi_ai_catalog.metlife_pipeline.modelo_fraude_serving` (Regressão Logística; GBT SparkML não é servível em Model Serving)
