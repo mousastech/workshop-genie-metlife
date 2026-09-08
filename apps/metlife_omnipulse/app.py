@@ -19,6 +19,21 @@ SCHEMA = os.environ.get("GOLD_SCHEMA", "moi_ai_catalog.metlife_pipeline")
 ENDPOINT = os.environ.get("SERVING_ENDPOINT", "metlife-fraude")
 GENIE_URL = os.environ.get("GENIE_URL", "")
 
+def pg_connect():
+    """Conecta ao Lakebase provisionado: PGHOST/PGUSER/PGDATABASE vêm do recurso do app;
+    a senha é um token OAuth gerado em runtime pelo SDK (SP do app)."""
+    import psycopg, uuid, requests
+    inst = os.environ.get("LAKEBASE_INSTANCE", "metlife-omnipulse-db")
+    headers = cfg.authenticate()  # {'Authorization': 'Bearer <token do SP do app>'}
+    r = requests.post(f"{cfg.host}/api/2.0/database/credentials", headers=headers,
+                      json={"request_id": str(uuid.uuid4()), "instance_names": [inst]}, timeout=30)
+    r.raise_for_status()
+    token = r.json()["token"]
+    return psycopg.connect(
+        host=os.environ["PGHOST"], port=int(os.environ.get("PGPORT", "5432")),
+        dbname=os.environ.get("PGDATABASE", "omnipulse"), user=os.environ["PGUSER"],
+        password=token, sslmode="require")
+
 def q(sql_text):
     with dbsql.connect(server_hostname=cfg.host.replace("https://", ""),
                        http_path=f"/sql/1.0/warehouses/{WAREHOUSE}",
@@ -110,8 +125,7 @@ def portfolio():
 @app.post("/api/action")
 def action(payload: dict):
     try:
-        import psycopg
-        conn = psycopg.connect()  # usa PGHOST/PGUSER/PGPASSWORD/PGDATABASE do recurso Lakebase
+        conn = pg_connect()
         with conn, conn.cursor() as cur:
             cur.execute("""CREATE TABLE IF NOT EXISTS decisions(
                 id serial PRIMARY KEY, modulo text, referencia text, acao text,
@@ -122,5 +136,19 @@ def action(payload: dict):
         return {"status": "gravado_no_lakebase"}
     except Exception as e:
         return {"status": "registrado_local", "nota": "Lakebase indisponível no runtime", "erro": str(e)[:120]}
+
+@app.on_event("startup")
+def _selftest_lakebase():
+    # Prova de conectividade com o Lakebase no boot (best-effort)
+    try:
+        with pg_connect() as conn, conn.cursor() as cur:
+            cur.execute("""CREATE TABLE IF NOT EXISTS decisions(
+                id serial PRIMARY KEY, modulo text, referencia text, acao text,
+                detalhe jsonb, criado_em timestamptz DEFAULT now())""")
+            cur.execute("INSERT INTO decisions(modulo,referencia,acao,detalhe) VALUES('_selftest','boot','startup', %s)",
+                        (json.dumps({"ok": True}),))
+        print("[lakebase] selftest OK — decisão de boot gravada")
+    except Exception as e:
+        print("[lakebase] selftest FALHOU:", str(e)[:200])
 
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
