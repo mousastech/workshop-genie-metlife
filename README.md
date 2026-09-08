@@ -24,6 +24,7 @@ Kit completo e reproduzível de um **workshop prático de Databricks AI/BI + Gen
 | **ML — modelo de fraude** | [`notebooks/metlife_ml_fraude_treino.py`](notebooks/metlife_ml_fraude_treino.py) | GBT (Spark MLlib) + MLflow → Unity Catalog Model Registry |
 | **MLOps · feedback loop** | [`notebooks/metlife_ml_retreino_feedback.py`](notebooks/metlife_ml_retreino_feedback.py) · [`jobs/`](jobs/) | Re-treino com rótulos das investigações (Lakebase) → nova versão @champion |
 | **App OmniPulse AI (flagship)** | [`apps/metlife_omnipulse/`](apps/metlife_omnipulse/) | React+FastAPI+Lakebase · 3 módulos (Fast-Claims, Churn Shield, BrokerX) + AI Gateway |
+| **App Odonto — Cotação (WhatsApp)** | [`apps/metlife_odonto/`](apps/metlife_odonto/) | Cotação conversacional (simulador WhatsApp) → Lakebase → melhor plano; /webhook p/ fase 2 |
 | **Databricks App** | [`apps/metlife_triagem/`](apps/metlife_triagem/) | App de triagem de sinistros + governança AI Gateway |
 | **Sessão 2 · Negócio (notebook)** | [`notebooks/metlife_workshop_class_sessao2_business.py`](notebooks/metlife_workshop_class_sessao2_business.py) | Aula guiada AI/BI + Genie (consome o Gold) |
 | **Notebook guiado (Academy)** | [`notebooks/metlife_workshop_demo.py`](notebooks/metlife_workshop_demo.py) | Reconstrói e explica todo o ambiente, com o **roteiro da demo** ao final |

@@ -1,0 +1,26 @@
+{
+  "version": "v1",
+  "host": "https://fevm-moi-ai.cloud.databricks.com",
+  "remote_path": "/Workspace/Users/moises.santos@databricks.com/workshop_metlife/app_odonto",
+  "last_modified_times": {
+    "README.md": "2026-09-08T19:58:44.33504886-03:00",
+    "app.py": "2026-09-08T19:57:29.648975958-03:00",
+    "app.yaml": "2026-09-08T19:58:44.325367735-03:00",
+    "requirements.txt": "2026-09-08T19:58:44.330269007-03:00",
+    "static/index.html": "2026-09-08T19:58:05.516264618-03:00"
+  },
+  "local_to_remote_names": {
+    "README.md": "README.md",
+    "app.py": "app.py",
+    "app.yaml": "app.yaml",
+    "requirements.txt": "requirements.txt",
+    "static/index.html": "static/index.html"
+  },
+  "remote_to_local_names": {
+    "README.md": "README.md",
+    "app.py": "app.py",
+    "app.yaml": "app.yaml",
+    "requirements.txt": "requirements.txt",
+    "static/index.html": "static/index.html"
+  }
+}
