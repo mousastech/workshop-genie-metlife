@@ -75,8 +75,17 @@ def avancar(row, msg):
     elif st=="orcamento":
         u["orcamento"]=_dec(m); u["estado"]="nome"; reply="Por fim, qual o seu *nome*?"
     elif st=="nome":
-        u["nome"]=m[:80]; u["estado"]="concluido"; done=True; plano="__RECO__"  # recomenda no handler (precisa do cursor)
+        u["nome"]=m[:80]; u["estado"]="confirma_handoff"; plano="__RECO__"  # recomenda no handler
         reply=None
+    elif st=="confirma_handoff":
+        if m.lower().startswith(("s","sim","autoriz","claro","pode")):
+            u["handoff"]="solicitado"; u["estado"]="aguardando_operador"; done=True
+            reply="👨‍⚕️ *Perfeito!* Vou transferir você para um de nossos consultores, que continuará por aqui para explicar o plano e tirar dúvidas. Aguarde um instante…"
+        else:
+            u["estado"]="concluido"; done=True
+            reply="Tudo bem! Sua cotação fica salva. Se mudar de ideia, é só chamar. Digite *reiniciar* para uma nova. 🦷"
+    elif st in ("aguardando_operador","em_atendimento"):
+        reply=None  # bot silencioso — quem responde é o operador (console)
     else:  # concluido/fim
         if m.lower().startswith("reinic"):
             u={"estado":"inicio","consentimento":None,"perfil":None,"vidas":None,"uf":None,"idade_max":None,"cobertura_desejada":None,"orcamento":None,"nome":None,"plano_recomendado":None,"preco_estimado":None}
@@ -105,13 +114,51 @@ def processar(session_id, msg, canal="simulador"):
             u["plano_recomendado"]=reco["nome"]; u["preco_estimado"]=reco["total"]
             reply=(f"✅ *Cotação pronta, {merged.get('nome','')}!*\nRecomendamos o *{reco['nome']}* ({reco['cobertura']}).\n"
                    f"💰 *R$ {reco['preco_por_vida']:.2f}/vida* × {reco['vidas']} = *R$ {reco['total']:.2f}/mês*\n"
-                   f"🦷 {reco['rede']}\n⏳ Carência: {reco['carencia']} meses\n{reco['nota']}\nDigite *reiniciar* para uma nova cotação.")
+                   f"🦷 {reco['rede']}\n⏳ Carência: {reco['carencia']} meses\n{reco['nota']}\n\n"
+                   f"❓ *Isso faz sentido para você?* Posso pedir para um de nossos consultores continuar por aqui e explicar o plano em detalhes?\nResponda *sim* para falar com um operador, ou *não*.")
         # persiste updates
         if u:
             sets=", ".join([f"{k}=%s" for k in u]); vals=list(u.values())+[session_id]
             cur.execute(f"UPDATE cotacoes_odonto SET {sets}, atualizado_em=now() WHERE session_id=%s", vals)
-        cur.execute("INSERT INTO cotacao_mensagens(session_id,origem,texto) VALUES(%s,'bot',%s)",(session_id,reply or ""))
+        if reply:
+            cur.execute("INSERT INTO cotacao_mensagens(session_id,origem,texto) VALUES(%s,'bot',%s)",(session_id,reply))
     return {"reply":reply,"done":done,"plano":planojson}
+
+# ---------------- Console do Operador (handoff humano) ----------------
+@app.get("/api/mensagens/{sid}")
+def mensagens(sid: str, after: int = 0):
+    with pg() as conn, conn.cursor() as cur:
+        cur.execute("SELECT id,origem,texto,criado_em FROM cotacao_mensagens WHERE session_id=%s AND id>%s ORDER BY id",(sid,after))
+        return [{"id":r[0],"origem":r[1],"texto":r[2],"criado_em":str(r[3])} for r in cur.fetchall()]
+
+@app.get("/api/atendimento/lista")
+def fila():
+    with pg() as conn, conn.cursor() as cur:
+        cur.execute("""SELECT session_id,nome,perfil,vidas,uf,cobertura_desejada,plano_recomendado,preco_estimado,
+                       handoff,operador,atualizado_em FROM cotacoes_odonto
+                       WHERE handoff IN ('solicitado','em_atendimento') ORDER BY handoff DESC, atualizado_em DESC""")
+        c=[d[0] for d in cur.description]
+        return [dict(zip(c,r)) for r in cur.fetchall()]
+
+@app.post("/api/atendimento/responder")
+async def responder(req: Request):
+    b=await req.json(); sid=b.get("session_id"); op=b.get("operador","operador"); txt=b.get("texto","")
+    with pg() as conn, conn.cursor() as cur:
+        cur.execute("INSERT INTO cotacao_mensagens(session_id,origem,texto) VALUES(%s,'operador',%s)",(sid,txt))
+        cur.execute("UPDATE cotacoes_odonto SET handoff='em_atendimento', operador=%s, estado='em_atendimento', atualizado_em=now() WHERE session_id=%s",(op,sid))
+    # FASE 2: enviar txt ao cliente via WhatsApp Cloud API
+    return {"status":"enviado"}
+
+@app.post("/api/atendimento/concluir")
+async def concluir(req: Request):
+    b=await req.json()
+    with pg() as conn, conn.cursor() as cur:
+        cur.execute("UPDATE cotacoes_odonto SET handoff='concluido', estado='concluido', atualizado_em=now() WHERE session_id=%s",(b.get("session_id"),))
+    return {"status":"concluido"}
+
+@app.get("/operador")
+def operador():
+    return HTMLResponse(open("static/operador.html", encoding="utf-8").read())
 
 # ---------------- API do simulador ----------------
 @app.post("/api/chat")

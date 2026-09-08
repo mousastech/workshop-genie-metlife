@@ -50,6 +50,15 @@ function planCard(p){const d=document.createElement('div');d.className='plan';
   <div style="font-size:13px;margin-top:6px">🦷 ${p.rede}</div>`;
   chat.appendChild(d);chat.scrollTop=chat.scrollHeight;}
 function quicks(items){quick.innerHTML='';items.forEach(t=>{const b=document.createElement('button');b.textContent=t;b.onclick=()=>{inp.value=t;doSend();};quick.appendChild(b);});}
+let lastId=0, polling=null;
+function startPolling(){
+  if(polling) return;
+  polling=setInterval(async()=>{
+    const r=await fetch(`/api/mensagens/${sid}?after=${lastId}`); const ms=await r.json();
+    if(Array.isArray(ms)) ms.forEach(m=>{ lastId=Math.max(lastId,m.id);
+      if(m.origem==='operador') bubble('👨‍⚕️ Consultor: '+m.texto,'bot'); });
+  },3000);
+}
 async function doSend(){
   const txt=inp.value.trim(); if(txt){bubble(txt,'me');} inp.value=''; quick.innerHTML='';
   const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_id:sid,mensagem:txt})});
@@ -57,15 +66,15 @@ async function doSend(){
   if(d.error){bubble('⚠️ '+d.error,'bot');return;}
   if(d.reply) bubble(d.reply,'bot');
   if(d.plano) planCard(d.plano);
-  // sugestões rápidas conforme a pergunta
   const q=(d.reply||'').toLowerCase();
-  if(q.includes('sim para começar')||q.includes('lgpd')) quicks(['sim','não']);
+  if(q.includes('começar')||q.includes('lgpd')) quicks(['sim','não']);
   else if(q.includes('individual')||q.includes('família')) quicks(['Individual','Família']);
   else if(q.includes('cobertura')) quicks(['1','2','3']);
+  else if(q.includes('faz sentido')||q.includes('operador')) quicks(['sim','não']);
   else if(q.includes('reiniciar')) quicks(['reiniciar']);
+  if(q.includes('consultor')||q.includes('transferir')) startPolling();  // handoff → recebe msgs do operador
 }
 send.onclick=doSend; inp.addEventListener('keydown',e=>{if(e.key==='Enter')doSend();});
-// inicia a conversa
 doSend();
 </script>
 </body></html>
