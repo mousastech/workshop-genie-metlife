@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MetLife OmniPulse AI</title>
+<style>
+  :root{--navy:#002B5C;--blue:#0090DA;--green:#8CC63F;--ink:#0c1b2e;--muted:#5b6b80;--bg:#eef3f9;--card:#fff;--line:#e2e9f2;--alto:#FF7E5C;--medio:#FFA600;--baixo:#8CC63F}
+  *{box-sizing:border-box}body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  .top{background:linear-gradient(135deg,#002B5C,#0090DA);color:#fff;padding:14px 22px;display:flex;align-items:center;gap:14px;box-shadow:0 3px 12px rgba(0,43,92,.18)}
+  .brand{font-weight:800;font-size:20px;letter-spacing:-.3px}
+  .brand .m{background:#fff;color:#0090DA;padding:2px 8px;border-radius:6px;margin-right:8px;font-weight:900}
+  .brand small{font-weight:600;opacity:.85;font-size:13px}
+  .tabs{display:flex;gap:6px;padding:14px 22px 0;flex-wrap:wrap}
+  .tab{padding:10px 18px;border:1px solid var(--line);border-bottom:none;border-radius:12px 12px 0 0;background:#e7eef6;cursor:pointer;font-weight:700;color:var(--muted)}
+  .tab.on{background:var(--card);color:var(--navy);box-shadow:0 -2px 0 var(--blue) inset}
+  .wrap{padding:22px;max-width:1200px;margin:0 auto}
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px}
+  @media(max-width:800px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 3px 10px rgba(0,43,92,.06)}
+  .kpi .v{font-size:24px;font-weight:800;color:var(--navy)}.kpi .l{font-size:12px;color:var(--muted);font-weight:600;margin-top:3px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 6px 20px rgba(0,43,92,.08);margin-bottom:18px}
+  h2{color:var(--navy);margin:.2em 0 .1em;font-size:20px}.sub{color:var(--muted);margin:0 0 14px;font-size:14px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}th,td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+  tr:hover{background:#f6fafe}
+  .badge{display:inline-block;padding:3px 10px;border-radius:999px;font-weight:800;font-size:12px;color:#fff}
+  .b-Alto{background:var(--alto)}.b-Medio{background:var(--medio)}.b-Baixo{background:var(--baixo)}
+  .bar{height:10px;border-radius:6px;background:#e7eef6;overflow:hidden;min-width:80px}.bar>span{display:block;height:100%;background:linear-gradient(90deg,#0090DA,#8CC63F)}
+  .btn{border:0;border-radius:10px;padding:8px 14px;font-weight:700;cursor:pointer;font-size:13px}
+  .btn-p{background:linear-gradient(135deg,#0090DA,#8CC63F);color:#fff}.btn-g{background:#fff;border:1px solid var(--line);color:var(--navy)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:18px}@media(max-width:800px){.row2{grid-template-columns:1fr}}
+  .chartbar{display:flex;align-items:center;gap:10px;margin:8px 0}.chartbar .lbl{width:110px;font-size:13px;color:var(--muted)}
+  .chartbar .track{flex:1;height:20px;background:#eef3f9;border-radius:6px;overflow:hidden}.chartbar .fill{height:100%;background:linear-gradient(90deg,#0090DA,#8CC63F)}
+  .chartbar .val{width:90px;text-align:right;font-weight:700;font-size:13px;color:var(--navy)}
+  input,textarea{font-family:inherit}
+  .ask{display:flex;gap:8px;margin-top:10px}.ask input{flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:10px}
+  .toast{position:fixed;bottom:20px;right:20px;background:var(--navy);color:#fff;padding:12px 18px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.2);font-weight:600}
+  .muted{color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.4/babel.min.js"></script>
+<script type="text/babel">
+const {useState,useEffect} = React;
+const fmt = n => (n==null?'-':Number(n).toLocaleString('pt-BR'));
+const brl = n => (n==null?'-':'R$ '+Number(n).toLocaleString('pt-BR',{maximumFractionDigits:0}));
+async function api(path,opts){const r=await fetch(path,opts);return r.json();}
+
+function Toast({msg}){return msg?<div className="toast">{msg}</div>:null;}
+
+function KPIs(){
+  const [k,setK]=useState(null);
+  useEffect(()=>{api('/api/kpis').then(setK);},[]);
+  if(!k) return <div className="muted">Carregando indicadores…</div>;
+  if(k.error) return <div className="card muted">Erro ao carregar KPIs: {k.error}</div>;
+  const items=[['Apólices ativas',fmt(k.apolices_ativas)],['Prêmio mensal',brl(k.premio_mensal)],
+    ['Inadimplência',k.inadimplencia+'%'],['Sinistros suspeitos',fmt(k.sinistros_suspeitos)],['Liquidação média',k.dias_liquidacao+' dias']];
+  return <div className="kpis">{items.map((i,x)=><div className="kpi" key={x}><div className="v">{i[1]}</div><div className="l">{i[0]}</div></div>)}</div>;
+}
+
+function FastClaims({toast}){
+  const [rows,setRows]=useState(null);
+  useEffect(()=>{api('/api/claims').then(setRows);},[]);
+  const act=(r,acao)=>api('/api/action',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({modulo:'fast-claims',referencia:r.numero_sinistro,acao,detalhe:{valor:r.valor_reclamado,score:r.score_fraude}})})
+    .then(x=>toast(`Sinistro ${r.numero_sinistro}: ${acao} (${x.status})`));
+  if(!rows) return <div className="muted">Carregando fila…</div>;
+  if(rows.error) return <div className="card muted">Erro: {rows.error}</div>;
+  return <div className="card">
+    <h2>🩺 Módulo 1 · Fast-Claims — fila de triagem de fraude (alto risco)</h2>
+    <p className="sub">Score do modelo <b>metlife-fraude</b> (Model Serving + AI Gateway). Priorize investigação sem travar sinistros legítimos.</p>
+    <table><thead><tr><th>Sinistro</th><th>Tipo</th><th>Linha</th><th>Região</th><th>Valor reclamado</th><th>Score</th><th>Risco</th><th>Ação</th></tr></thead>
+    <tbody>{rows.map((r,i)=><tr key={i}>
+      <td>{r.numero_sinistro}</td><td>{r.tipo_sinistro}</td><td>{r.linha_negocio}</td><td>{r.regiao}</td>
+      <td>{brl(r.valor_reclamado)}</td>
+      <td><div className="bar"><span style={{width:r.score_fraude+'%'}}></span></div><small>{r.score_fraude}</small></td>
+      <td><span className={'badge b-'+r.nivel_risco}>{r.nivel_risco}</span></td>
+      <td><button className="btn btn-p" onClick={()=>act(r,'Investigar')}>Investigar</button> <button className="btn btn-g" onClick={()=>act(r,'Aprovar')}>Aprovar</button></td>
+    </tr>)}</tbody></table>
+  </div>;
+}
+
+function Churn({toast}){
+  const [rows,setRows]=useState(null);
+  useEffect(()=>{api('/api/churn').then(setRows);},[]);
+  const act=(r)=>api('/api/action',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({modulo:'churn-shield',referencia:r.numero_apolice,acao:'Oferta de retenção',detalhe:{score:r.score_churn}})})
+    .then(x=>toast(`Apólice ${r.numero_apolice}: oferta de retenção acionada (${x.status})`));
+  if(!rows) return <div className="muted">Carregando carteira…</div>;
+  if(rows.error) return <div className="card muted">Erro: {rows.error}</div>;
+  return <div className="card">
+    <h2>🛡️ Módulo 2 · Churn Shield — propensão a cancelamento</h2>
+    <p className="sub">Score de churn a partir de inadimplência, suspensão e ticket. Aciona régua de retenção (WhatsApp na fase 2).</p>
+    <table><thead><tr><th>Apólice</th><th>Produto</th><th>Linha</th><th>Região</th><th>Prêmio</th><th>Meses inadimpl.</th><th>Score churn</th><th>Ação</th></tr></thead>
+    <tbody>{rows.map((r,i)=><tr key={i}>
+      <td>{r.numero_apolice}</td><td>{r.nome_produto}</td><td>{r.linha_negocio}</td><td>{r.regiao}</td>
+      <td>{brl(r.premio_mensal)}</td><td>{r.meses_inadimplente}</td>
+      <td><div className="bar"><span style={{width:r.score_churn+'%'}}></span></div><small>{r.score_churn}</small></td>
+      <td><button className="btn btn-p" onClick={()=>act(r)}>Reter</button></td>
+    </tr>)}</tbody></table>
+  </div>;
+}
+
+function BrokerX(){
+  const [p,setP]=useState(null);
+  useEffect(()=>{api('/api/portfolio').then(setP);},[]);
+  if(!p) return <div className="muted">Carregando carteira…</div>;
+  if(p.error) return <div className="card muted">Erro: {p.error}</div>;
+  const maxR=Math.max(...p.regiao.map(x=>x.premio));
+  const totL=p.linha.reduce((s,x)=>s+Number(x.apolices),0);
+  return <div>
+    <div className="row2">
+      <div className="card"><h2>📊 Prêmio mensal por região</h2>
+        {p.regiao.map((r,i)=><div className="chartbar" key={i}><div className="lbl">{r.regiao}</div>
+          <div className="track"><div className="fill" style={{width:(100*r.premio/maxR)+'%'}}></div></div>
+          <div className="val">{brl(r.premio)}</div></div>)}
+      </div>
+      <div className="card"><h2>🧩 Mix por linha de negócio</h2>
+        {p.linha.map((r,i)=><div className="chartbar" key={i}><div className="lbl">{r.linha_negocio}</div>
+          <div className="track"><div className="fill" style={{width:(100*r.apolices/totL)+'%'}}></div></div>
+          <div className="val">{fmt(r.apolices)}</div></div>)}
+      </div>
+    </div>
+    <div className="card"><h2>🤖 Módulo 3 · BrokerX Copilot</h2>
+      <p className="sub">Consulte a carteira em linguagem natural com o Databricks Genie.</p>
+      <div className="ask">
+        <input placeholder="Ex.: Quais apólices da minha carteira têm maior chance de upgrade este mês?" id="qgenie"/>
+        <button className="btn btn-p" onClick={()=>{const u=p.genie_url||'#'; window.open(u,'_blank');}}>Perguntar no Genie ↗</button>
+      </div>
+      <p className="muted" style={{marginTop:10}}>O Genie converte a pergunta em SQL governado sobre o Gold e retorna a resposta com o gráfico.</p>
+    </div>
+  </div>;
+}
+
+function App(){
+  const [tab,setTab]=useState('claims');
+  const [msg,setMsg]=useState('');
+  const toast=(m)=>{setMsg(m);setTimeout(()=>setMsg(''),3500);};
+  return <div>
+    <div className="top"><div className="brand"><span className="m">MetLife</span>OmniPulse AI <small>· Intelligence Hub · Databricks</small></div></div>
+    <div className="tabs">
+      <div className={'tab'+(tab==='claims'?' on':'')} onClick={()=>setTab('claims')}>🩺 Fast-Claims</div>
+      <div className={'tab'+(tab==='churn'?' on':'')} onClick={()=>setTab('churn')}>🛡️ Churn Shield</div>
+      <div className={'tab'+(tab==='broker'?' on':'')} onClick={()=>setTab('broker')}>🤖 BrokerX Copilot</div>
+    </div>
+    <div className="wrap">
+      <KPIs/>
+      {tab==='claims' && <FastClaims toast={toast}/>}
+      {tab==='churn' && <Churn toast={toast}/>}
+      {tab==='broker' && <BrokerX/>}
+    </div>
+    <Toast msg={msg}/>
+  </div>;
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

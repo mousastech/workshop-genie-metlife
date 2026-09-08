@@ -1,0 +1,23 @@
+{
+  "version": "v1",
+  "host": "https://fevm-moi-ai.cloud.databricks.com",
+  "remote_path": "/Workspace/Users/moises.santos@databricks.com/workshop_metlife/app_omnipulse",
+  "last_modified_times": {
+    "app.py": "2026-09-08T14:51:14.562091399-03:00",
+    "app.yaml": "2026-09-08T14:53:01.361971698-03:00",
+    "requirements.txt": "2026-09-08T14:53:01.367715806-03:00",
+    "static/index.html": "2026-09-08T14:52:26.850856204-03:00"
+  },
+  "local_to_remote_names": {
+    "app.py": "app.py",
+    "app.yaml": "app.yaml",
+    "requirements.txt": "requirements.txt",
+    "static/index.html": "static/index.html"
+  },
+  "remote_to_local_names": {
+    "app.py": "app.py",
+    "app.yaml": "app.yaml",
+    "requirements.txt": "requirements.txt",
+    "static/index.html": "static/index.html"
+  }
+}

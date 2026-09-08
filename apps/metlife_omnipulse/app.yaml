@@ -1,0 +1,10 @@
+command: ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+env:
+  - name: DATABRICKS_WAREHOUSE_ID
+    value: "cf23eafe0d3f0ba7"
+  - name: GOLD_SCHEMA
+    value: "moi_ai_catalog.metlife_pipeline"
+  - name: SERVING_ENDPOINT
+    value: "metlife-fraude"
+  - name: GENIE_URL
+    value: "https://fevm-moi-ai.cloud.databricks.com/genie/rooms/01f1ab9021281c98a4a183c6b5f80067?o=7474658545709121"
