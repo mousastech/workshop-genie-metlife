@@ -11,11 +11,12 @@
 # MAGIC
 # MAGIC | Horário | Bloco | Nesta aula |
 # MAGIC |---|---|---|
-# MAGIC | 09h00–09h15 | **1 · Arquitetura Lakehouse & medalhão** | Unity Catalog, Lakeflow, schema + Volume |
-# MAGIC | 09h15–09h45 | **2 · Ingestão (Bronze)** | Auto Loader / `read_files` / COPY INTO → Bronze cru |
-# MAGIC | 09h45–10h20 | **3 · Transformação (Silver)** | tipagem, dedup, qualidade (expectations) |
-# MAGIC | 10h20–10h45 | **4 · Modelagem (Gold)** | dimensões e fatos prontos para consumo |
-# MAGIC | 10h45–11h00 | **5 · Orquestração & Governança** | Lakeflow Pipeline/Job, lineage, tags · handoff p/ Sessão 2 |
+# MAGIC | 09h00–09h10 | **1 · Arquitetura Lakehouse & medalhão** | Unity Catalog, Lakeflow, schema + Volume |
+# MAGIC | 09h10–09h35 | **2 · Ingestão (Bronze)** | Auto Loader / `read_files` / COPY INTO → Bronze cru |
+# MAGIC | 09h35–10h05 | **3 · Transformação (Silver → Gold)** | tipagem, dedup, qualidade + dimensões e fatos |
+# MAGIC | 10h05–10h30 | **4 · Preparação de Dados & Machine Learning** | features + treinar modelo, orquestrado após o pipeline |
+# MAGIC | 10h30–10h50 | **5 · Databricks Apps & AI Gateway** | criar um app e governar o consumo de IA |
+# MAGIC | 10h50–11h00 | **6 · Orquestração & Governança** | Job (pipeline→treino→dashboard), lineage, tags · handoff |
 # MAGIC
 # MAGIC ## 🎯 Objetivos
 # MAGIC Ao final você será capaz de: desenhar a arquitetura medalhão no Unity Catalog; ingerir dados brutos com **Auto Loader**; aplicar **qualidade de dados** e tipagem no Silver; modelar **dimensões e fatos** no Gold; e orquestrar/governar o pipeline com **Lakeflow** — entregando o Gold que a Sessão 2 consome.
@@ -27,7 +28,7 @@
 # MAGIC %md
 # MAGIC ---
 # MAGIC # 🕘 Bloco 1 · Arquitetura Lakehouse & medalhão
-# MAGIC **09h00–09h15**
+# MAGIC **09h00–09h10**
 # MAGIC
 # MAGIC 🧑‍🏫 **Medalhão (Bronze → Silver → Gold)** é o padrão de refino progressivo:
 # MAGIC - **Bronze** — dado cru, fiel à origem (schema flexível, histórico de ingestão).
@@ -51,7 +52,7 @@
 # MAGIC %md
 # MAGIC ---
 # MAGIC # 🕘 Bloco 2 · Ingestão — camada Bronze
-# MAGIC **09h15–09h45**
+# MAGIC **09h10–09h35**
 # MAGIC
 # MAGIC 🧑‍🏫 Em produção, o Bronze é alimentado por **Auto Loader** (ingestão incremental de arquivos que chegam num Volume/cloud storage), por **COPY INTO** (batch idempotente) ou por conectores/streaming. Padrões:
 # MAGIC
@@ -153,8 +154,8 @@
 
 # MAGIC %md
 # MAGIC ---
-# MAGIC # 🕘 Bloco 3 · Transformação — camada Silver
-# MAGIC **09h45–10h20**
+# MAGIC # 🕘 Bloco 3 · Transformação — Silver → Gold
+# MAGIC **09h35–10h05**
 # MAGIC
 # MAGIC 🧑‍🏫 No Silver aplicamos **tipagem**, **padronização de categorias**, **deduplicação** e **qualidade de dados**. Numa Declarative Pipeline, a qualidade é declarativa com **expectations**:
 # MAGIC
@@ -266,13 +267,8 @@
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ---
-# MAGIC # 🕘 Bloco 4 · Modelagem — camada Gold
-# MAGIC **10h20–10h45**
-# MAGIC
-# MAGIC 🧑‍🏫 O **Gold** é o modelo de negócio: **dimensões** conformadas e **fatos** prontos para BI/IA, preservando as dimensões que os analistas vão filtrar (linha de negócio, canal, região, produto, tempo). É exatamente o conjunto que a **Sessão 2** consome via Metric Views, Genie e dashboards.
-# MAGIC
-# MAGIC Aqui promovemos o Silver a Gold, adicionando algumas colunas de negócio derivadas (ex.: faixa de capital, mês de competência).
+# MAGIC ### 3.2 · Promoção a Gold — dimensões e fatos
+# MAGIC O **Gold** é o modelo de negócio: **dimensões** conformadas e **fatos** prontos para BI/IA, preservando as dimensões que os analistas filtram (linha, canal, região, produto, tempo) — exatamente o conjunto que a **Sessão 2** consome via Metric Views, Genie e dashboards. Promovemos o Silver a Gold adicionando colunas derivadas (faixa de capital, mês de competência).
 
 # COMMAND ----------
 
@@ -315,12 +311,106 @@
 
 # MAGIC %md
 # MAGIC ---
-# MAGIC # 🕘 Bloco 5 · Orquestração & Governança · handoff para a Sessão 2
-# MAGIC **10h45–11h00**
+# MAGIC # 🕘 Bloco 4 · Preparação de Dados & Machine Learning
+# MAGIC **10h05–10h30**
 # MAGIC
-# MAGIC 🧑‍🏫 **Orquestração.** Em produção, este medalhão é um **Lakeflow Declarative Pipeline** (Bronze/Silver/Gold como *streaming tables* e *materialized views*, com *expectations*), agendado por um **Lakeflow Job**. O repositório traz a versão pronta em `pipelines/metlife_medallion.sql` + `pipelines/README.md`.
+# MAGIC 🧑‍🏫 Com o **Gold** pronto, preparamos *features* e treinamos um modelo de **propensão a fraude em sinistros** — classificação binária que gera um **score de risco** para **priorizar a fila de investigação**. Temos o rótulo `suspeita_fraude` no Gold.
 # MAGIC
-# MAGIC **Governança (Unity Catalog).** Aplicamos tags de domínio no Gold (mesma taxonomia da Sessão 2) e contamos com **lineage** automático (bronze → silver → gold → Metric Views → dashboards/Genie).
+# MAGIC - **Preparação de dados:** seleção de features (tipo de sinistro, linha, região, valor reclamado, dias de liquidação, dias desde a emissão), tratamento de nulos e *encoding* de categorias.
+# MAGIC - **Modelo:** **Gradient-Boosted Trees** (Spark MLlib) — forte em dados tabulares; baseline de **Regressão Logística** para explicabilidade; **Databricks AutoML** como acelerador.
+# MAGIC - **MLOps:** rastreamento com **MLflow** e versionamento no **Unity Catalog Model Registry** (`moi_ai_catalog.metlife_pipeline.modelo_fraude`).
+# MAGIC - **Orquestração:** o treino roda como uma **task do Job, dependente do pipeline** — sempre que o Gold é atualizado, o modelo é re-treinado.
+# MAGIC
+# MAGIC ▶️ Treino (Spark MLlib + MLflow → Unity Catalog):
+
+# COMMAND ----------
+
+# Treino do modelo de propensao a FRAUDE (Spark MLlib + MLflow, registrado no Unity Catalog)
+# Requer runtime com ML (MLlib e MLflow ja inclusos).
+from pyspark.sql.functions import col
+from pyspark.ml import Pipeline
+from pyspark.ml.feature import StringIndexer, OneHotEncoder, VectorAssembler
+from pyspark.ml.classification import GBTClassifier
+from pyspark.ml.evaluation import BinaryClassificationEvaluator
+import mlflow
+from mlflow.models.signature import infer_signature
+
+mlflow.set_registry_uri("databricks-uc")
+MODELO = "moi_ai_catalog.metlife_pipeline.modelo_fraude"
+
+df = (spark.table("moi_ai_catalog.metlife_pipeline.gold_sinistros")
+        .select("tipo_sinistro", "linha_negocio", "regiao",
+                col("valor_reclamado").cast("double"),
+                col("dias_liquidacao").cast("double"),
+                col("dias_desde_emissao").cast("double"),
+                col("suspeita_fraude").cast("int").alias("label"))
+        .na.fill(0))
+
+cats = ["tipo_sinistro", "linha_negocio", "regiao"]
+stages  = [StringIndexer(inputCol=c, outputCol=c+"_i", handleInvalid="keep") for c in cats]
+stages += [OneHotEncoder(inputCols=[c+"_i" for c in cats], outputCols=[c+"_o" for c in cats])]
+stages += [VectorAssembler(
+    inputCols=[c+"_o" for c in cats] + ["valor_reclamado", "dias_liquidacao", "dias_desde_emissao"],
+    outputCol="features")]
+stages += [GBTClassifier(featuresCol="features", labelCol="label", maxIter=30)]
+
+train, test = df.randomSplit([0.8, 0.2], seed=42)
+with mlflow.start_run(run_name="fraude_gbt"):
+    model = Pipeline(stages=stages).fit(train)
+    auc = BinaryClassificationEvaluator(labelCol="label", metricName="areaUnderROC").evaluate(model.transform(test))
+    mlflow.log_metric("auc_roc", auc)
+    feat = ["tipo_sinistro", "linha_negocio", "regiao", "valor_reclamado", "dias_liquidacao", "dias_desde_emissao"]
+    sig = infer_signature(test.select(*feat).limit(200).toPandas(),
+                          model.transform(test.limit(200)).select("prediction").toPandas())
+    mlflow.spark.log_model(model, "model", signature=sig, registered_model_name=MODELO,
+                           dfs_tmpdir="/Volumes/moi_ai_catalog/metlife_pipeline/mlartifacts")
+    print(f"AUC-ROC = {auc:.3f} | modelo registrado em {MODELO}")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ✅ **Checkpoint ML.** O modelo é registrado no Unity Catalog e versionado. No Job, esta etapa é a task **`treinar_modelo`**, que depende do pipeline — treino e dados ficam sincronizados. O modelo pode então ser publicado como **Model Serving endpoint** e consumido pelo app (próximo bloco), sob governança do **AI Gateway**.
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ---
+# MAGIC # 🕘 Bloco 5 · Databricks Apps & AI Gateway
+# MAGIC **10h30–10h50**
+# MAGIC
+# MAGIC 🧑‍🏫 **Databricks Apps** permite publicar aplicações web (FastAPI, Streamlit, Dash…) **dentro do Databricks**, com identidade e governança do Unity Catalog — sem infra externa. Vamos criar um app de **triagem de sinistros** que lê o Gold e chama o **modelo de fraude** para ranquear casos.
+# MAGIC
+# MAGIC **Estrutura mínima de um app** (no repositório: `apps/metlife_triagem/`):
+# MAGIC ```yaml
+# MAGIC # app.yaml
+# MAGIC command: ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+# MAGIC env:
+# MAGIC   - name: DATABRICKS_WAREHOUSE_ID
+# MAGIC     value: "<warehouse_id>"
+# MAGIC ```
+# MAGIC ```bash
+# MAGIC databricks apps create metlife-triagem
+# MAGIC databricks sync ./apps/metlife_triagem "/Workspace/Users/<voce>/metlife_triagem"
+# MAGIC databricks apps deploy metlife-triagem --source-code-path "/Workspace/Users/<voce>/metlife_triagem"
+# MAGIC ```
+# MAGIC
+# MAGIC 🛡️ **Governança com AI Gateway.** Quando o app (ou o Genie) consome LLMs/modelos via **Model Serving**, o **AI Gateway** aplica controles no endpoint:
+# MAGIC - **Rate limiting** por usuário/endpoint e **usage tracking** (custo/consumo).
+# MAGIC - **Payload logging** (inference tables) para auditoria.
+# MAGIC - **Guardrails** (PII, tópicos) e **fallbacks** entre modelos.
+# MAGIC
+# MAGIC Assim, o consumo de IA do app fica **rastreável, seguro e com custo controlado** — o mesmo padrão que governa o Genie na Sessão 2.
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ---
+# MAGIC # 🕘 Bloco 6 · Orquestração & Governança · handoff para a Sessão 2
+# MAGIC **10h50–11h00**
+# MAGIC
+# MAGIC 🧑‍🏫 **Orquestração (Lakeflow Job).** Um único **Job** encadeia o dia: **Task 1** roda o Declarative Pipeline (Bronze→Silver→Gold); ao concluir, **Task 2** re-treina o modelo de fraude e **Task 3** atualiza o **dashboard AI/BI** — dados, modelo e painel sempre **sincronizados**. Artefatos no repositório: `pipelines/` e `jobs/`.
+# MAGIC
+# MAGIC **Governança (Unity Catalog).** Tags de domínio no Gold (mesma taxonomia da Sessão 2), **lineage** automático (bronze → silver → gold → modelo/Metric Views → Genie/dashboards) e **AI Gateway** no consumo de IA.
 
 # COMMAND ----------
 

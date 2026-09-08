@@ -260,11 +260,12 @@
     <p class="lead">Construção do pipeline medalhão (Bronze → Silver → Gold) no Unity Catalog, com ingestão via Auto Loader, qualidade de dados e modelagem — até os dados aterrissarem no catálogo que a Sessão 2 consome.</p>
 
     <div class="timeline">
-      <div class="tl"><span class="dur">15 min</span><div class="t">09h00 – 09h15</div><div class="b">1 · Arquitetura Lakehouse &amp; medalhão</div><div class="d">Unity Catalog, Lakeflow, schema + Volume.</div></div>
-      <div class="tl"><span class="dur">30 min</span><div class="t">09h15 – 09h45</div><div class="b">2 · Ingestão (Bronze)</div><div class="d">Auto Loader / <code>read_files</code> / COPY INTO → Bronze cru.</div></div>
-      <div class="tl"><span class="dur">35 min</span><div class="t">09h45 – 10h20</div><div class="b">3 · Transformação (Silver)</div><div class="d">Tipagem, deduplicação e qualidade (expectations).</div></div>
-      <div class="tl"><span class="dur">25 min</span><div class="t">10h20 – 10h45</div><div class="b">4 · Modelagem (Gold)</div><div class="d">Dimensões e fatos prontos para BI/IA.</div></div>
-      <div class="tl"><span class="dur">15 min</span><div class="t">10h45 – 11h00</div><div class="b">5 · Orquestração &amp; Governança</div><div class="d">Lakeflow Pipeline/Job, lineage, tags · handoff p/ Sessão 2.</div></div>
+      <div class="tl"><span class="dur">10 min</span><div class="t">09h00 – 09h10</div><div class="b">1 · Arquitetura Lakehouse &amp; medalhão</div><div class="d">Unity Catalog, Lakeflow, schema + Volume.</div></div>
+      <div class="tl"><span class="dur">25 min</span><div class="t">09h10 – 09h35</div><div class="b">2 · Ingestão (Bronze)</div><div class="d">Auto Loader / <code>read_files</code> / COPY INTO → Bronze cru.</div></div>
+      <div class="tl"><span class="dur">30 min</span><div class="t">09h35 – 10h05</div><div class="b">3 · Transformação (Silver → Gold)</div><div class="d">Tipagem, dedup, qualidade + dimensões e fatos.</div></div>
+      <div class="tl"><span class="dur">25 min</span><div class="t">10h05 – 10h30</div><div class="b">4 · Preparação de Dados &amp; Machine Learning</div><div class="d">Features + treinar modelo de fraude, orquestrado após o pipeline.</div></div>
+      <div class="tl"><span class="dur">20 min</span><div class="t">10h30 – 10h50</div><div class="b">5 · Databricks Apps &amp; AI Gateway</div><div class="d">Criar um app e governar o consumo de IA.</div></div>
+      <div class="tl"><span class="dur">10 min</span><div class="t">10h50 – 11h00</div><div class="b">6 · Orquestração &amp; Governança</div><div class="d">Job (pipeline→treino→dashboard), lineage, tags · handoff.</div></div>
     </div>
 
     <div class="block" style="margin-top:22px">
@@ -285,26 +286,47 @@
     </div>
 
     <div class="block">
-      <div class="head"><span class="num">Bloco 3</span><span class="time">09h45–10h20</span><h3>Transformação — camada Silver</h3></div>
-      <p>Tipagem, padronização de categorias, <b>deduplicação</b> (row_number por chave natural) e <b>qualidade</b>. Numa Declarative Pipeline, a qualidade é declarativa: <code>CONSTRAINT ... EXPECT (...) ON VIOLATION DROP ROW</code>. Linhas reprovadas vão para uma tabela de <b>quarentena</b> para inspeção.</p>
+      <div class="head"><span class="num">Bloco 3</span><span class="time">09h35–10h05</span><h3>Transformação — Silver → Gold</h3></div>
+      <p><b>Silver:</b> tipagem, padronização de categorias, <b>deduplicação</b> e <b>qualidade</b> declarativa (<code>CONSTRAINT ... EXPECT (...) ON VIOLATION DROP ROW</code>) com tabela de <b>quarentena</b>. <b>Gold:</b> dimensões conformadas e fatos prontos, preservando o que o negócio filtra (linha, canal, região, produto, tempo) + colunas derivadas (faixa de capital, mês de competência). É o formato que a <b>Sessão 2</b> consome.</p>
       <div class="lab">
         <span class="tag">🧪 Lab técnico</span>
         <ul>
-          <li>Silver tipado (datas, decimais), dimensões deduplicadas.</li>
-          <li>Regras de qualidade em <code>apolices</code> (prêmio ≥ 0, linha válida) + quarentena.</li>
+          <li>Silver tipado + dedup + regras de qualidade em <code>apolices</code> (prêmio ≥ 0, linha válida) + quarentena.</li>
+          <li>Promover a Gold (dimensões + fatos) com colunas de negócio derivadas.</li>
+        </ul>
+      </div>
+      <div class="check"><b>✅ Checkpoint:</b> o Gold reconcilia com a origem — 8.000 apólices · 177.523 prêmios · 2.500 sinistros.</div>
+    </div>
+
+    <div class="block">
+      <div class="head"><span class="num">Bloco 4</span><span class="time">10h05–10h30</span><h3>Preparação de Dados &amp; Machine Learning</h3></div>
+      <p>Com o Gold pronto, preparamos <i>features</i> e treinamos um modelo de <b>propensão a fraude em sinistros</b> — classificação que gera um <b>score de risco</b> para priorizar investigação (rótulo <code>suspeita_fraude</code> disponível no Gold).</p>
+      <div class="lab">
+        <span class="tag">🧪 Lab técnico · ML</span>
+        <ul>
+          <li><b>Modelo:</b> Gradient-Boosted Trees (Spark MLlib); baseline Regressão Logística; <b>AutoML</b> como acelerador.</li>
+          <li><b>MLOps:</b> <b>MLflow</b> + <b>Unity Catalog Model Registry</b> (<code>metlife_pipeline.modelo_fraude</code>).</li>
+          <li><b>Orquestração:</b> o treino é uma <b>task do Job dependente do pipeline</b> — re-treina quando o Gold muda.</li>
+        </ul>
+      </div>
+      <div class="check"><b>✅ Checkpoint:</b> modelo registrado e versionado no UC, pronto para servir sob AI Gateway.</div>
+    </div>
+
+    <div class="block">
+      <div class="head"><span class="num">Bloco 5</span><span class="time">10h30–10h50</span><h3>Databricks Apps &amp; AI Gateway</h3></div>
+      <p><b>Databricks Apps</b> publica aplicações web (FastAPI/Streamlit) <b>dentro do Databricks</b>, com identidade e governança do Unity Catalog. Construímos um app de <b>triagem de sinistros</b> que lê o Gold e ranqueia os casos de maior risco de fraude.</p>
+      <div class="lab">
+        <span class="tag">🧪 Lab técnico · Apps</span>
+        <ul>
+          <li>Scaffold <code>app.yaml</code> + FastAPI (<code>apps/metlife_triagem/</code>) → <code>databricks apps deploy</code>.</li>
+          <li><b>AI Gateway</b> governa o consumo de IA (Model Serving): rate limits, usage tracking, payload logging (inference tables), guardrails e fallbacks.</li>
         </ul>
       </div>
     </div>
 
     <div class="block">
-      <div class="head"><span class="num">Bloco 4</span><span class="time">10h20–10h45</span><h3>Modelagem — camada Gold</h3></div>
-      <p>Dimensões conformadas e fatos prontos, preservando o que o negócio filtra (linha, canal, região, produto, tempo) e adicionando colunas derivadas (ex.: faixa de capital, mês de competência). É o formato que a <b>Sessão 2</b> consome.</p>
-      <div class="check"><b>✅ Checkpoint:</b> o Gold reconcilia com a origem — 8.000 apólices · 177.523 prêmios · 2.500 sinistros.</div>
-    </div>
-
-    <div class="block">
-      <div class="head"><span class="num">Bloco 5</span><span class="time">10h45–11h00</span><h3>Orquestração &amp; Governança · handoff</h3></div>
-      <p>O medalhão roda como um <b>Lakeflow Declarative Pipeline</b> (Auto Loader + expectations) orquestrado por um <b>Job</b>: a Task 1 atualiza Bronze→Silver→Gold e a Task 2, dependente, <b>atualiza o dashboard AI/BI</b> — dados e painel sempre <b>sincronizados</b>. Com <b>lineage</b> automático (bronze → silver → gold → Metric Views → Genie/dashboards) e <b>tags de Domain</b> no Gold. O ambiente do workshop já tem o pipeline e o Job provisionados.</p>
+      <div class="head"><span class="num">Bloco 6</span><span class="time">10h50–11h00</span><h3>Orquestração &amp; Governança · handoff</h3></div>
+      <p>Um único <b>Lakeflow Job</b> encadeia o dia: <b>Task 1</b> roda o pipeline (Bronze→Silver→Gold); ao concluir, <b>Task 2</b> re-treina o modelo de fraude e <b>Task 3</b> atualiza o <b>dashboard AI/BI</b> — dados, modelo e painel sempre <b>sincronizados</b>. Com <b>lineage</b> automático (bronze → silver → gold → modelo/Metric Views → Genie/dashboards), <b>tags de Domain</b> e <b>AI Gateway</b> no consumo de IA. O ambiente já tem pipeline e Job provisionados.</p>
       <div class="links">
         <a class="btn btn-primary" href="https://fevm-moi-ai.cloud.databricks.com/pipelines/c8b22fb6-22a4-48b5-868e-c87dbcb45b8e?o=7474658545709121"><span class="em">🧱</span> Pipeline (Lakeflow) ao vivo</a>
         <a class="btn btn-ghost" href="https://fevm-moi-ai.cloud.databricks.com/jobs/93737767044104?o=7474658545709121"><span class="em">🔄</span> Job de orquestração</a>

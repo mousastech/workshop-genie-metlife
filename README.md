@@ -20,6 +20,9 @@ Kit completo e reproduzível de um **workshop prático de Databricks AI/BI + Gen
 |---|---|---|
 | **Sessão 1 · Data Engineering (notebook)** | [`notebooks/metlife_workshop_class_sessao1_dataeng.py`](notebooks/metlife_workshop_class_sessao1_dataeng.py) | Aula guiada: pipeline medalhão Bronze→Silver→Gold que aterrissa no catálogo |
 | **Pipeline medalhão (Lakeflow)** | [`pipelines/`](pipelines/) | Declarative Pipeline (SQL) produtivo — Auto Loader + expectations + Gold |
+| **Orquestração (Job)** | [`jobs/`](jobs/) | Job: pipeline → treino do modelo → refresh do dashboard (sincronizados) |
+| **ML — modelo de fraude** | [`notebooks/metlife_ml_fraude_treino.py`](notebooks/metlife_ml_fraude_treino.py) | GBT (Spark MLlib) + MLflow → Unity Catalog Model Registry |
+| **Databricks App** | [`apps/metlife_triagem/`](apps/metlife_triagem/) | App de triagem de sinistros + governança AI Gateway |
 | **Sessão 2 · Negócio (notebook)** | [`notebooks/metlife_workshop_class_sessao2_business.py`](notebooks/metlife_workshop_class_sessao2_business.py) | Aula guiada AI/BI + Genie (consome o Gold) |
 | **Notebook guiado (Academy)** | [`notebooks/metlife_workshop_demo.py`](notebooks/metlife_workshop_demo.py) | Reconstrói e explica todo o ambiente, com o **roteiro da demo** ao final |
 | **Dados sintéticos** | [`sql/00`–`sql/07`](sql/) | 7 tabelas de seguros geradas 100% em SQL |

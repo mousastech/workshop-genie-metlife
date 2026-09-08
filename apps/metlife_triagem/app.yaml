@@ -1,0 +1,11 @@
+# Databricks App — Triagem de Sinistros (MetLife)
+# Publica uma app FastAPI dentro do Databricks, com identidade e governança do Unity Catalog.
+command: ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+
+env:
+  # Warehouse usado para consultar o Gold (defina no deploy)
+  - name: DATABRICKS_WAREHOUSE_ID
+    value: "cf23eafe0d3f0ba7"
+  # (Opcional) endpoint de Model Serving do modelo de fraude, governado por AI Gateway
+  - name: SERVING_ENDPOINT
+    value: "metlife-fraude"

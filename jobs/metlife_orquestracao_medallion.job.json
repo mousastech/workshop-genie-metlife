@@ -1,27 +1,22 @@
 {
   "name": "metlife_orquestracao_medallion",
-  "description": "Orquestra o medalhão: roda o Lakeflow Declarative Pipeline (Bronze->Silver->Gold) e, ao concluir, atualiza o dashboard AI/BI — mantendo dados e dashboard sincronizados.",
+  "description": "Orquestra o dia: Task1 roda o Lakeflow Declarative Pipeline (Bronze->Silver->Gold); ao concluir, Task2 re-treina o modelo de fraude e Task3 atualiza o dashboard AI/BI — dados, modelo e painel sincronizados.",
   "tasks": [
     {
       "task_key": "pipeline_bronze_silver_gold",
-      "pipeline_task": {
-        "pipeline_id": "<PIPELINE_ID>",
-        "full_refresh": false
-      }
+      "pipeline_task": {"pipeline_id": "<PIPELINE_ID>", "full_refresh": false}
+    },
+    {
+      "task_key": "treinar_modelo_fraude",
+      "depends_on": [{"task_key": "pipeline_bronze_silver_gold"}],
+      "notebook_task": {"notebook_path": "/Workspace/Users/<voce>/workshop_metlife/MetLife_ML_Fraude_Treino"}
     },
     {
       "task_key": "refresh_dashboard_aibi",
       "depends_on": [{"task_key": "pipeline_bronze_silver_gold"}],
-      "dashboard_task": {
-        "dashboard_id": "<DASHBOARD_ID>",
-        "warehouse_id": "<WAREHOUSE_ID>"
-      }
+      "dashboard_task": {"dashboard_id": "<DASHBOARD_ID>", "warehouse_id": "<WAREHOUSE_ID>"}
     }
   ],
-  "schedule": {
-    "quartz_cron_expression": "0 0 6 * * ?",
-    "timezone_id": "America/Sao_Paulo",
-    "pause_status": "PAUSED"
-  },
+  "schedule": {"quartz_cron_expression": "0 0 6 * * ?", "timezone_id": "America/Sao_Paulo", "pause_status": "PAUSED"},
   "queue": {"enabled": true}
 }
