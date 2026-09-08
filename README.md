@@ -8,7 +8,7 @@
 
 Kit completo e reproduzível de um **workshop prático de Databricks AI/BI + Genie** para a indústria de **seguros** (Vida & Previdência, Sinistros & Fraude, Distribuição & Corretores). Inclui dados sintéticos, camada semântica governada (Metric Views), Domain, glossário, dois Genie Spaces, um dashboard AI/BI e a base para o **Genie Ontology** — além de um notebook guiado estilo *Databricks Academy* e o roteiro da demo.
 
-> Workshop de referência: **17/09**, 9h–14h (1h de intervalo), público misto (negócio + dados). Dados 100% sintéticos, criados apenas para treinamento.
+> Workshop de referência: **17/09** · **Sessão 2 (11h–13h) — trilha Usuário de Negócio** (a Sessão 1, 09h–11h, é Data Engineering / técnico). 2 horas, sem código para o público de negócio. Dados 100% sintéticos, criados apenas para treinamento.
 
 📐 **Arquitetura e modelo de dados:** [`docs/arquitetura.md`](docs/arquitetura.md) (diagramas Mermaid).
 
@@ -25,6 +25,7 @@ Kit completo e reproduzível de um **workshop prático de Databricks AI/BI + Gen
 | **Genie Spaces** | [`genie/`](genie/) | 2 espaços (tabelas cruas · camada semântica) + script de criação |
 | **Dashboard AI/BI** | [`dashboard/`](dashboard/) | painel sobre os Metric Views + script de criação |
 | **Documentos** | [`docs/`](docs/) | programa & laboratório (PT-BR) e session overview (EN) |
+| **Página do workshop (HTML)** | [`site/workshop_metlife.html`](site/workshop_metlife.html) | guia visual da aula com identidade MetLife (abrir no navegador) |
 
 ---
 

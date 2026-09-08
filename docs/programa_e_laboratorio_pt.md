@@ -2,9 +2,13 @@
 
 <!-- toc -->
 
-**Data:** 17 de setembro de 2026 · **Horário:** 9h00 – 14h00 (1h de intervalo) · **Formato:** Presencial, mão na massa · **Público:** Negócio + Dados (misto)
+**Data:** 17 de setembro de 2026 · **Horário:** 11h00 – 13h00 (2h) · **Sessão 2 de 2 — trilha Usuário de Negócio** · **Formato:** Presencial, mão na massa · **Público:** Negócio (analistas e donos de área)
 
-Este documento reúne (1) o **menu / programa**, (2) o **ambiente e acessos**, (3) o **laboratório prático passo a passo em português**, (4) o **módulo de Genie Ontology / camada semântica** e (5) o **gabarito**. Todo o laboratório roda sobre uma base sintética de seguros no formato MetLife (Vida, Previdência, sinistros/fraude e distribuição).
+> **O dia em duas sessões:**
+> - **Sessão 1 · 09h00–11h00 — Databricks para Usuário Técnico (Data Engineering).**
+> - **Sessão 2 · 11h00–13h00 — Databricks para Usuário de Negócio (este documento): AI/BI + Genie.**
+
+Este documento reúne (1) o **menu / programa**, (2) o **ambiente e acessos**, (3) o **laboratório prático passo a passo em português**, (4) o **módulo de Genie Ontology / camada semântica** e (5) o **gabarito**. Todo o laboratório roda sobre uma base sintética de seguros no formato MetLife (Vida, Previdência, sinistros/fraude e distribuição). O público de negócio **não precisa escrever SQL** — os trechos de SQL servem de gabarito/bastidores para o instrutor.
 
 ---
 
@@ -12,15 +16,14 @@ Este documento reúne (1) o **menu / programa**, (2) o **ambiente e acessos**, (
 
 | Horário | Bloco | O que vamos fazer |
 |---------|-------|-------------------|
-| 09h00 – 09h30 | **1. Abertura e a visão de AI/BI para seguros** | Por que análise conversacional; tour da plataforma e do modelo de dados |
-| 09h30 – 10h30 | **2. Dashboards AI/BI (mão na massa)** | Construir seu primeiro dashboard, sem código |
-| 10h30 – 11h30 | **3. Genie — primeira conversa (mão na massa)** | Perguntas em linguagem natural sobre a base de seguros |
-| 11h30 – 12h30 | **Intervalo / Almoço** | — |
-| 12h30 – 13h30 | **4. Genie a fundo — curadoria, camada semântica e Ontology** | Instruções, sinônimos, Metric Views, Domain, glossário e SQL certificado |
-| 13h30 – 13h50 | **5. Laboratório de casos de uso MetLife** | Fraude, distribuição e persistência |
-| 13h50 – 14h00 | **6. Encerramento e jornada de adoção** | Próximos passos e Q&A |
+| 11h00 – 11h10 | **1. Abertura e a visão de AI/BI para seguros** | Por que análise conversacional; tour rápido da plataforma |
+| 11h10 – 11h40 | **2. Dashboards AI/BI (mão na massa)** | Construir seu primeiro dashboard, sem código |
+| 11h40 – 12h20 | **3. Genie — conversa em linguagem natural (mão na massa)** | Perguntas em linguagem natural sobre a base de seguros |
+| 12h20 – 12h45 | **4. Genie confiável — curadoria e camada semântica** | Instruções, sinônimos, Metric Views, Domain, glossário e Ontology |
+| 12h45 – 12h55 | **5. Laboratório de casos de uso MetLife** | Fraude, distribuição e persistência |
+| 12h55 – 13h00 | **6. Encerramento e jornada de adoção** | Próximos passos e Q&A |
 
-**Objetivos de aprendizagem.** Ao final, cada participante será capaz de: navegar a Databricks Data Intelligence Platform; construir e compartilhar um dashboard AI/BI; fazer perguntas de negócio no Genie e validar o SQL gerado; entender o que torna uma resposta do Genie *confiável* (instruções, sinônimos, **Metric Views**, **Domain**, **glossário** e exemplos certificados) e como isso alimenta o **Genie Ontology**; e aplicar tudo isso a três casos de uso MetLife.
+**Objetivos de aprendizagem.** Ao final, cada participante será capaz de: navegar a Databricks Data Intelligence Platform; construir e compartilhar um dashboard AI/BI sem código; fazer perguntas de negócio no Genie e interpretar as respostas; entender o que torna uma resposta do Genie *confiável* (instruções, sinônimos, **Metric Views**, **Domain**, **glossário** e exemplos certificados) e como isso alimenta o **Genie Ontology**; e aplicar tudo isso a três casos de uso MetLife.
 
 ---
 

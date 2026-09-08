@@ -1,17 +1,21 @@
 # MetLife — AI/BI + Genie Enablement Workshop | Session Overview
 
 
-**Date:** September 17, 2026 · **Time:** 9:00 AM – 2:00 PM (BRT) · **Duration:** 5 hours (4h content + 1h break) · **Format:** Instructor-led, hands-on
+**Date:** September 17, 2026 · **Time:** 11:00 AM – 1:00 PM (BRT) · **Duration:** 2 hours · **Session 2 of 2 — Business User track** · **Format:** Instructor-led, hands-on
+
+> **The day at a glance (two sessions):**
+> - **Session 1 · 09:00–11:00 — Databricks for the Technical User (Data Engineering).**
+> - **Session 2 · 11:00–13:00 — Databricks for the Business User (this overview): AI/BI + Genie.**
 
 ---
 
 ## About this session
 
-This hands-on workshop introduces MetLife's business and data teams to **Databricks AI/BI** — self-service dashboards and **Genie**, the natural-language interface that lets anyone ask questions of governed data in plain language and get trusted answers back as tables, charts, and SQL.
+This hands-on session introduces MetLife's **business teams** to **Databricks AI/BI** — self-service dashboards and **Genie**, the natural-language interface that lets anyone ask questions of governed data in plain language and get trusted answers back as tables and charts.
 
-Rather than slides, participants work directly in a live Databricks workspace against a realistic **insurance dataset** (Life & Pension policies, premiums, claims, fraud signals, and broker/channel distribution). By the end, each participant will have built a dashboard and run a full analytical conversation in Genie against MetLife-shaped data.
+Rather than slides, participants work directly in a live Databricks workspace against a realistic **insurance dataset** (Life & Pension policies, premiums, claims, fraud signals, and broker/channel distribution). By the end, each participant will have built a dashboard and run an analytical conversation in Genie against MetLife-shaped data.
 
-The session is designed for a **mixed audience** of business analysts and data practitioners. No prior Databricks experience is required; basic familiarity with insurance concepts (policies, premiums, claims) is helpful.
+The session is designed for a **business audience** — analysts and business owners. **No coding is required** and no prior Databricks experience is needed; basic familiarity with insurance concepts (policies, premiums, claims) is helpful.
 
 ---
 
@@ -29,49 +33,45 @@ The session is designed for a **mixed audience** of business analysts and data p
 
 | Time | Block | Focus |
 |------|-------|-------|
-| 09:00 – 09:30 | 1. Opening & the AI/BI vision for insurance | Why conversational analytics; platform tour |
-| 09:30 – 10:30 | 2. AI/BI Dashboards (hands-on) | Build your first dashboard |
-| 10:30 – 11:30 | 3. Genie — first conversation (hands-on) | Natural-language analytics on insurance data |
-| 11:30 – 12:30 | Break / Lunch | — |
-| 12:30 – 13:30 | 4. Genie deep dive — curation, semantic layer & Ontology (hands-on) | Instructions, synonyms, Metric Views, Domain, glossary, certified SQL |
-| 13:30 – 13:50 | 5. MetLife use-case lab | Fraud, distribution & persistence |
-| 13:50 – 14:00 | 6. Wrap-up & adoption path | Next steps, Q&A |
+| 11:00 – 11:10 | 1. Opening & the AI/BI vision for insurance | Why conversational analytics; quick platform tour |
+| 11:10 – 11:40 | 2. AI/BI Dashboards (hands-on) | Build your first dashboard |
+| 11:40 – 12:20 | 3. Genie — natural-language analytics (hands-on) | Ask questions, read the answer |
+| 12:20 – 12:45 | 4. Trustworthy Genie — curation & semantic layer | Instructions, synonyms, Metric Views, Domain, glossary |
+| 12:45 – 12:55 | 5. MetLife use-case lab | Fraud, distribution & persistence |
+| 12:55 – 13:00 | 6. Wrap-up & adoption path | Next steps, Q&A |
 
 ---
 
 ## Key topics covered in each training block
 
-### Block 1 — Opening & the AI/BI vision for insurance (09:00–09:30)
+### Block 1 — Opening & the AI/BI vision for insurance (11:00–11:10)
 - The shift from report backlogs to **self-service, conversational analytics**.
 - Where AI/BI Dashboards and Genie sit on the Databricks Data Intelligence Platform, and how Unity Catalog governance keeps answers safe.
-- Tour of the workshop dataset: the insurance data model participants will use all day.
+- Quick tour of the workshop dataset: the insurance data model used throughout.
 
-### Block 2 — AI/BI Dashboards, hands-on (09:30–10:30)
+### Block 2 — AI/BI Dashboards, hands-on (11:10–11:40)
 - Anatomy of an AI/BI dashboard: datasets, visualizations, and filters.
-- Building charts from a dataset (KPIs, bar/line, tables) with no SQL.
-- Cross-filtering, period selectors, and layout for an executive-ready view.
-- Publishing and sharing a dashboard with the team.
+- Building charts from a dataset (KPIs, bar/pie, tables) with no SQL.
+- Cross-filtering and layout for an executive-ready view; publishing and sharing.
 
-### Block 3 — Genie, first conversation, hands-on (10:30–11:30)
-- What Genie is and how it translates natural language into governed SQL.
-- Running a first set of business questions and reading the answer, the chart, and the generated SQL.
+### Block 3 — Genie, natural-language analytics, hands-on (11:40–12:20)
+- What Genie is and how it turns plain-language questions into trusted answers.
+- Running a set of business questions and reading the answer and the chart.
 - Follow-up questions and iterative refinement ("break it down by region", "only active policies").
 - Recognizing a good answer vs. one that needs clarification.
 
-### Block 4 — Genie deep dive: curation, semantic layer & Ontology, hands-on (12:30–13:30)
+### Block 4 — Trustworthy Genie: curation & semantic layer (12:20–12:45)
 - Why curation matters: turning a generic space into a **trusted domain agent**.
 - Business **instructions** and **synonyms** (e.g., "premium", "claim ratio", "persistence").
-- **Table relationships (joins)** so multi-table questions work reliably.
 - **Governed semantic layer**: **Metric Views** for canonical metrics (loss ratio, delinquency, persistence, fraud rate), a **Domain** (Unity Catalog tags) and a certified **business glossary**.
 - **Genie Ontology**: how these governed assets — plus auto-inferred context from dashboards and queries — form the account-level "business map" that grounds Genie's answers.
-- **Certified example SQL** and sample questions that steer Genie toward correct patterns; validating improvements by re-asking questions that previously failed.
 
-### Block 5 — MetLife use-case lab (13:30–13:50)
+### Block 5 — MetLife use-case lab (12:45–12:55)
 - **Claims & fraud:** claim volumes, average settlement time, and fraud-suspicion signals.
 - **Distribution:** broker and channel performance vs. targets.
 - **Premium persistence:** delinquency and retention across regions and channels.
 
-### Block 6 — Wrap-up & adoption path (13:50–14:00)
+### Block 6 — Wrap-up & adoption path (12:55–13:00)
 - From workshop to production: how to bring MetLife's own data into Genie.
 - Governance, sharing, and rollout considerations.
 - Open Q&A.
