@@ -137,17 +137,76 @@ def action(payload: dict):
     except Exception as e:
         return {"status": "registrado_local", "nota": "Lakebase indisponível no runtime", "erro": str(e)[:120]}
 
+def _ensure_tables(cur):
+    cur.execute("""CREATE TABLE IF NOT EXISTS decisions(
+        id serial PRIMARY KEY, modulo text, referencia text, acao text,
+        detalhe jsonb, criado_em timestamptz DEFAULT now())""")
+    cur.execute("""CREATE TABLE IF NOT EXISTS investigacoes(
+        referencia text PRIMARY KEY, tipo text, valor_reclamado numeric, score int,
+        status text NOT NULL DEFAULT 'Aberta', responsavel text,
+        desfecho text, aberta_em timestamptz DEFAULT now(),
+        atualizada_em timestamptz DEFAULT now(), prazo_sla timestamptz)""")
+    cur.execute("""CREATE TABLE IF NOT EXISTS feedback(
+        id serial PRIMARY KEY, referencia text, label int, origem text, criado_em timestamptz DEFAULT now())""")
+
+# ---------- Investigações (status/SLA) ----------
+@app.get("/api/investigacoes")
+def investigacoes():
+    try:
+        with pg_connect() as conn, conn.cursor() as cur:
+            _ensure_tables(cur)
+            cur.execute("SELECT referencia, status, responsavel, desfecho, prazo_sla FROM investigacoes")
+            cols=[d[0] for d in cur.description]
+            return {r[0]: dict(zip(cols, r)) for r in cur.fetchall()}
+    except Exception as e:
+        return JSONResponse({"error": str(e)[:160]}, status_code=500)
+
+@app.post("/api/investigar")
+def investigar(payload: dict):
+    """Abre/atualiza um caso de investigação com SLA de 72h (Módulo 1)."""
+    try:
+        with pg_connect() as conn, conn.cursor() as cur:
+            _ensure_tables(cur)
+            cur.execute("""INSERT INTO investigacoes(referencia,tipo,valor_reclamado,score,status,responsavel,prazo_sla)
+                VALUES(%s,%s,%s,%s,'Em análise',%s, now()+interval '72 hours')
+                ON CONFLICT (referencia) DO UPDATE SET status='Em análise', atualizada_em=now()""",
+                (payload.get("referencia"), payload.get("tipo"), payload.get("valor_reclamado"),
+                 payload.get("score"), payload.get("responsavel","analista.demo")))
+            cur.execute("INSERT INTO decisions(modulo,referencia,acao,detalhe) VALUES('fast-claims',%s,'Investigar',%s)",
+                        (payload.get("referencia"), json.dumps(payload)))
+        return {"status":"Em análise","sla_horas":72}
+    except Exception as e:
+        return JSONResponse({"error": str(e)[:160]}, status_code=500)
+
+@app.post("/api/decisao")
+def decisao(payload: dict):
+    """Fecha o caso com desfecho e grava rótulo p/ re-treino (feedback loop MLOps)."""
+    try:
+        desfecho = payload.get("desfecho")  # 'Fraude confirmada' | 'Legítimo'
+        label = 1 if desfecho == "Fraude confirmada" else 0
+        with pg_connect() as conn, conn.cursor() as cur:
+            _ensure_tables(cur)
+            cur.execute("""INSERT INTO investigacoes(referencia,tipo,valor_reclamado,score,status,desfecho)
+                VALUES(%s,%s,%s,%s,'Concluída',%s)
+                ON CONFLICT (referencia) DO UPDATE SET status='Concluída', desfecho=EXCLUDED.desfecho, atualizada_em=now()""",
+                (payload.get("referencia"), payload.get("tipo"), payload.get("valor_reclamado"), payload.get("score"), desfecho))
+            cur.execute("INSERT INTO feedback(referencia,label,origem) VALUES(%s,%s,'fast-claims')",
+                        (payload.get("referencia"), label))
+            cur.execute("INSERT INTO decisions(modulo,referencia,acao,detalhe) VALUES('fast-claims',%s,%s,%s)",
+                        (payload.get("referencia"), desfecho, json.dumps(payload)))
+        return {"status":"Concluída","desfecho":desfecho,"rotulo":label}
+    except Exception as e:
+        return JSONResponse({"error": str(e)[:160]}, status_code=500)
+
 @app.on_event("startup")
 def _selftest_lakebase():
     # Prova de conectividade com o Lakebase no boot (best-effort)
     try:
         with pg_connect() as conn, conn.cursor() as cur:
-            cur.execute("""CREATE TABLE IF NOT EXISTS decisions(
-                id serial PRIMARY KEY, modulo text, referencia text, acao text,
-                detalhe jsonb, criado_em timestamptz DEFAULT now())""")
+            _ensure_tables(cur)
             cur.execute("INSERT INTO decisions(modulo,referencia,acao,detalhe) VALUES('_selftest','boot','startup', %s)",
                         (json.dumps({"ok": True}),))
-        print("[lakebase] selftest OK — decisão de boot gravada")
+        print("[lakebase] selftest OK — tabelas garantidas e decisão de boot gravada")
     except Exception as e:
         print("[lakebase] selftest FALHOU:", str(e)[:200])
 

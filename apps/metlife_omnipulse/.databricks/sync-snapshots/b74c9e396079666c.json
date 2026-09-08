@@ -4,10 +4,10 @@
   "remote_path": "/Workspace/Users/moises.santos@databricks.com/workshop_metlife/app_omnipulse",
   "last_modified_times": {
     "README.md": "2026-09-08T14:55:32.891359147-03:00",
-    "app.py": "2026-09-08T15:06:42.167009444-03:00",
+    "app.py": "2026-09-08T17:59:24.151477052-03:00",
     "app.yaml": "2026-09-08T15:05:28.474906502-03:00",
     "requirements.txt": "2026-09-08T14:53:01.367715806-03:00",
-    "static/index.html": "2026-09-08T14:52:26.850856204-03:00"
+    "static/index.html": "2026-09-08T18:00:15.867657578-03:00"
   },
   "local_to_remote_names": {
     "README.md": "README.md",

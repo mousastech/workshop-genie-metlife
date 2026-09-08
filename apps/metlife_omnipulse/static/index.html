@@ -61,25 +61,40 @@ function KPIs(){
   return <div className="kpis">{items.map((i,x)=><div className="kpi" key={x}><div className="v">{i[1]}</div><div className="l">{i[0]}</div></div>)}</div>;
 }
 
+const stColor={'Em análise':'#FFA600','Concluída':'#8CC63F','Aberta':'#0090DA'};
 function FastClaims({toast}){
   const [rows,setRows]=useState(null);
-  useEffect(()=>{api('/api/claims').then(setRows);},[]);
-  const act=(r,acao)=>api('/api/action',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({modulo:'fast-claims',referencia:r.numero_sinistro,acao,detalhe:{valor:r.valor_reclamado,score:r.score_fraude}})})
-    .then(x=>toast(`Sinistro ${r.numero_sinistro}: ${acao} (${x.status})`));
+  const [inv,setInv]=useState({});
+  const load=()=>{api('/api/claims').then(setRows);api('/api/investigacoes').then(d=>setInv(d&&!d.error?d:{}));};
+  useEffect(load,[]);
+  const feat=r=>({tipo_sinistro:r.tipo_sinistro,linha_negocio:r.linha_negocio,regiao:r.regiao,
+    valor_reclamado:Number(r.valor_reclamado),dias_liquidacao:Number(r.dias_liquidacao||0),dias_desde_emissao:Number(r.dias_desde_emissao||0)});
+  const post=(u,b)=>api(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
+  const reavaliar=r=>post('/api/score',feat(r)).then(x=>{const p=x.prediction; toast(`Modelo ao vivo · ${r.numero_sinistro}: ${(p==1||p==='1')?'⚠️ FRAUDE (1)':'✅ Legítimo (0)'}`);});
+  const investigar=r=>post('/api/investigar',{referencia:r.numero_sinistro,tipo:r.tipo_sinistro,valor_reclamado:Number(r.valor_reclamado),score:r.score_fraude}).then(x=>{toast(`Caso ${r.numero_sinistro}: ${x.status||x.error} (SLA 72h)`);load();});
+  const decidir=(r,d)=>post('/api/decisao',{referencia:r.numero_sinistro,tipo:r.tipo_sinistro,valor_reclamado:Number(r.valor_reclamado),score:r.score_fraude,desfecho:d}).then(x=>{toast(`Caso ${r.numero_sinistro}: ${x.status?d:x.error}`);load();});
   if(!rows) return <div className="muted">Carregando fila…</div>;
   if(rows.error) return <div className="card muted">Erro: {rows.error}</div>;
+  const abertos=Object.values(inv).filter(v=>v.status==='Em análise').length;
   return <div className="card">
-    <h2>🩺 Módulo 1 · Fast-Claims — fila de triagem de fraude (alto risco)</h2>
-    <p className="sub">Score do modelo <b>metlife-fraude</b> (Model Serving + AI Gateway). Priorize investigação sem travar sinistros legítimos.</p>
-    <table><thead><tr><th>Sinistro</th><th>Tipo</th><th>Linha</th><th>Região</th><th>Valor reclamado</th><th>Score</th><th>Risco</th><th>Ação</th></tr></thead>
-    <tbody>{rows.map((r,i)=><tr key={i}>
-      <td>{r.numero_sinistro}</td><td>{r.tipo_sinistro}</td><td>{r.linha_negocio}</td><td>{r.regiao}</td>
+    <h2>🩺 Módulo 1 · Fast-Claims — triagem de fraude (alto risco)</h2>
+    <p className="sub">Score do modelo <b>metlife-fraude</b> (Model Serving + AI Gateway). <b>Reavaliar</b> chama o modelo ao vivo; <b>Investigar</b> abre caso (SLA 72h) no Lakebase; o desfecho vira rótulo p/ re-treino. Casos em análise: <b>{abertos}</b>.</p>
+    <table><thead><tr><th>Sinistro</th><th>Tipo</th><th>Região</th><th>Valor</th><th>Score</th><th>Risco</th><th>Status</th><th>Ações</th></tr></thead>
+    <tbody>{rows.map((r,i)=>{const s=inv[r.numero_sinistro];return <tr key={i}>
+      <td>{r.numero_sinistro}</td><td>{r.tipo_sinistro}</td><td>{r.regiao}</td>
       <td>{brl(r.valor_reclamado)}</td>
       <td><div className="bar"><span style={{width:r.score_fraude+'%'}}></span></div><small>{r.score_fraude}</small></td>
       <td><span className={'badge b-'+r.nivel_risco}>{r.nivel_risco}</span></td>
-      <td><button className="btn btn-p" onClick={()=>act(r,'Investigar')}>Investigar</button> <button className="btn btn-g" onClick={()=>act(r,'Aprovar')}>Aprovar</button></td>
-    </tr>)}</tbody></table>
+      <td>{s?<span className="badge" style={{background:stColor[s.status]||'#5b6b80'}}>{s.status}{s.desfecho?': '+s.desfecho:''}</span>:<span className="muted">—</span>}</td>
+      <td style={{whiteSpace:'nowrap'}}>
+        <button className="btn btn-g" onClick={()=>reavaliar(r)}>Reavaliar</button>{' '}
+        {(!s||s.status!=='Em análise')&&<button className="btn btn-p" onClick={()=>investigar(r)}>Investigar</button>}
+        {s&&s.status==='Em análise'&&<span>
+          <button className="btn btn-p" style={{background:'#FF7E5C'}} onClick={()=>decidir(r,'Fraude confirmada')}>Fraude</button>{' '}
+          <button className="btn btn-g" onClick={()=>decidir(r,'Legítimo')}>Legítimo</button>
+        </span>}
+      </td>
+    </tr>;})}</tbody></table>
   </div>;
 }
 
