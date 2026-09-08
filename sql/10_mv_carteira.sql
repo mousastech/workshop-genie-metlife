@@ -1,0 +1,10 @@
+CREATE OR REPLACE VIEW moi_ai_catalog.metlife_workshop.mv_carteira
+WITH METRICS
+LANGUAGE YAML
+AS $$
+version: 1.1
+comment: "Metricas governadas de carteira e producao de apolices (Vida e Previdencia) - MetLife"
+source: "(SELECT a.apolice_id, a.linha_negocio, a.nome_produto, a.tipo_produto, a.status_apolice, a.forma_pagamento, a.canal_distribuicao, a.regiao, a.uf, a.data_emissao, a.premio_mensal, a.capital_segurado, a.reserva_acumulada, c.segmento_cliente, c.renda_mensal, co.nome_corretor FROM moi_ai_catalog.metlife_workshop.apolices a JOIN moi_ai_catalog.metlife_workshop.clientes c ON a.cliente_id = c.cliente_id JOIN moi_ai_catalog.metlife_workshop.corretores co ON a.corretor_id = co.corretor_id)"
+dimensions: [{name: Linha de Negocio, expr: "linha_negocio", synonyms: ["ramo", "linha"]}, {name: Produto, expr: "nome_produto"}, {name: Tipo de Produto, expr: "tipo_produto"}, {name: Status da Apolice, expr: "status_apolice", synonyms: ["situacao"]}, {name: Forma de Pagamento, expr: "forma_pagamento"}, {name: Canal de Distribuicao, expr: "canal_distribuicao", synonyms: ["canal"]}, {name: Regiao, expr: "regiao"}, {name: UF, expr: "uf", synonyms: ["estado"]}, {name: Mes de Emissao, expr: "DATE_TRUNC('MONTH', data_emissao)"}, {name: Segmento do Cliente, expr: "segmento_cliente", synonyms: ["segmento"]}, {name: Corretor, expr: "nome_corretor"}]
+measures: [{name: Apolices, expr: "COUNT(1)", synonyms: ["numero de apolices"]}, {name: Apolices Ativas, expr: "COUNT(1) FILTER (WHERE status_apolice = 'Ativa')"}, {name: Premio Mensal Total, expr: "SUM(premio_mensal)", synonyms: ["premio", "arrecadacao potencial"]}, {name: Capital Segurado Total, expr: "SUM(capital_segurado)", synonyms: ["capital", "importancia segurada"]}, {name: Reserva Acumulada Total, expr: "SUM(reserva_acumulada)", synonyms: ["reserva", "saldo"]}, {name: Ticket Medio de Premio, expr: "MEASURE(`Premio Mensal Total`) / MEASURE(`Apolices`)"}, {name: Taxa de Cancelamento, expr: "COUNT(1) FILTER (WHERE status_apolice = 'Cancelada') * 1.0 / COUNT(1)", synonyms: ["cancelamento", "churn"]}]
+$$

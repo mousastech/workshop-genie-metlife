@@ -1,0 +1,73 @@
+{
+  "datasets": [
+    {"name": "ds_carteira", "displayName": "Carteira", "asset_name": "moi_ai_catalog.metlife_workshop.mv_carteira"},
+    {"name": "ds_arrecadacao", "displayName": "Arrecadacao", "asset_name": "moi_ai_catalog.metlife_workshop.mv_arrecadacao"},
+    {"name": "ds_sinistros", "displayName": "Sinistralidade", "asset_name": "moi_ai_catalog.metlife_workshop.mv_sinistralidade"},
+    {"name": "ds_top_corretores", "displayName": "Top corretores", "queryLines": [
+      "SELECT `Corretor`, MEASURE(`Premio Mensal Total`) AS premio, MEASURE(`Apolices Ativas`) AS ativas ",
+      "FROM mv_carteira GROUP BY `Corretor` ORDER BY premio DESC LIMIT 10"
+    ]}
+  ],
+  "pages": [
+    {
+      "name": "overview",
+      "displayName": "Visao Geral",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1",
+      "layout": [
+        {"widget": {"name": "title", "multilineTextboxSpec": {"lines": ["# MetLife — Painel de Seguros (camada semântica governada)\n", "Sobre os Metric Views `mv_carteira`, `mv_arrecadacao` e `mv_sinistralidade`. Dados sintéticos para o workshop AI/BI + Genie de 17/09. Use os filtros (Linha de Negócio, Região) para segmentar."]}}, "position": {"x": 0, "y": 0, "width": 12, "height": 2}},
+
+        {"widget": {"name": "kpi_ativas", "queries": [{"name": "main_query", "query": {"datasetName": "ds_carteira", "fields": [{"name": "measure(Apolices Ativas)", "expression": "MEASURE(`Apolices Ativas`)"}], "disaggregated": false}}], "spec": {"version": 2, "widgetType": "counter", "frame": {"title": "Apólices Ativas", "showTitle": true}, "encodings": {"value": {"fieldName": "measure(Apolices Ativas)", "displayName": "Apólices Ativas", "format": {"type": "number-plain", "decimalPlaces": {"type": "exact", "places": 0}}}}}}, "position": {"x": 0, "y": 2, "width": 3, "height": 3}},
+
+        {"widget": {"name": "kpi_premio", "queries": [{"name": "main_query", "query": {"datasetName": "ds_carteira", "fields": [{"name": "measure(Premio Mensal Total)", "expression": "MEASURE(`Premio Mensal Total`)"}], "disaggregated": false}}], "spec": {"version": 2, "widgetType": "counter", "frame": {"title": "Prêmio Mensal Total", "showTitle": true}, "encodings": {"value": {"fieldName": "measure(Premio Mensal Total)", "displayName": "Prêmio Mensal", "format": {"type": "number-currency", "currencyCode": "BRL", "abbreviation": "compact", "decimalPlaces": {"type": "exact", "places": 1}}}}}}, "position": {"x": 3, "y": 2, "width": 3, "height": 3}},
+
+        {"widget": {"name": "kpi_inad", "queries": [{"name": "main_query", "query": {"datasetName": "ds_arrecadacao", "fields": [{"name": "measure(Taxa de Inadimplencia)", "expression": "MEASURE(`Taxa de Inadimplencia`)"}], "disaggregated": false}}], "spec": {"version": 2, "widgetType": "counter", "frame": {"title": "Taxa de Inadimplência", "showTitle": true}, "encodings": {"value": {"fieldName": "measure(Taxa de Inadimplencia)", "displayName": "Inadimplência", "format": {"type": "number-percent", "decimalPlaces": {"type": "max", "places": 2}}}}}}, "position": {"x": 6, "y": 2, "width": 3, "height": 3}},
+
+        {"widget": {"name": "kpi_fraude", "queries": [{"name": "main_query", "query": {"datasetName": "ds_sinistros", "fields": [{"name": "measure(Taxa de Fraude)", "expression": "MEASURE(`Taxa de Fraude`)"}], "disaggregated": false}}], "spec": {"version": 2, "widgetType": "counter", "frame": {"title": "Taxa de Fraude (sinistros)", "showTitle": true}, "encodings": {"value": {"fieldName": "measure(Taxa de Fraude)", "displayName": "Fraude", "format": {"type": "number-percent", "decimalPlaces": {"type": "max", "places": 1}}}}}}, "position": {"x": 9, "y": 2, "width": 3, "height": 3}},
+
+        {"widget": {"name": "premio_regiao", "queries": [{"name": "main_query", "query": {"datasetName": "ds_carteira", "fields": [{"name": "Regiao", "expression": "`Regiao`"}, {"name": "measure(Premio Mensal Total)", "expression": "MEASURE(`Premio Mensal Total`)"}], "disaggregated": false}}], "spec": {"version": 3, "widgetType": "bar", "frame": {"title": "Prêmio mensal por região", "showTitle": true}, "encodings": {"x": {"fieldName": "Regiao", "scale": {"type": "categorical"}, "displayName": "Região"}, "y": {"fieldName": "measure(Premio Mensal Total)", "scale": {"type": "quantitative"}, "displayName": "Prêmio Mensal"}}}}, "position": {"x": 0, "y": 5, "width": 6, "height": 5}},
+
+        {"widget": {"name": "mix_linha", "queries": [{"name": "main_query", "query": {"datasetName": "ds_carteira", "fields": [{"name": "Linha de Negocio", "expression": "`Linha de Negocio`"}, {"name": "measure(Apolices)", "expression": "MEASURE(`Apolices`)"}], "disaggregated": false}}], "spec": {"version": 3, "widgetType": "pie", "frame": {"title": "Apólices por linha de negócio", "showTitle": true}, "encodings": {"angle": {"fieldName": "measure(Apolices)", "scale": {"type": "quantitative"}, "displayName": "Apólices"}, "color": {"fieldName": "Linha de Negocio", "scale": {"type": "categorical"}, "displayName": "Linha"}, "label": {"show": true}}}}, "position": {"x": 6, "y": 5, "width": 6, "height": 5}},
+
+        {"widget": {"name": "arrecadacao_mes", "queries": [{"name": "main_query", "query": {"datasetName": "ds_arrecadacao", "fields": [{"name": "Competencia", "expression": "`Competencia`"}, {"name": "measure(Valor Arrecadado)", "expression": "MEASURE(`Valor Arrecadado`)"}], "disaggregated": false, "orders": [{"direction": "ASC", "expression": "`Competencia`"}]}}], "spec": {"version": 3, "widgetType": "line", "frame": {"title": "Arrecadação mensal (prêmios pagos)", "showTitle": true}, "encodings": {"x": {"fieldName": "Competencia", "scale": {"type": "temporal"}, "displayName": "Competência"}, "y": {"fieldName": "measure(Valor Arrecadado)", "scale": {"type": "quantitative"}, "displayName": "Valor Arrecadado"}}}}, "position": {"x": 0, "y": 10, "width": 12, "height": 5}},
+
+        {"widget": {"name": "tempo_liq", "queries": [{"name": "main_query", "query": {"datasetName": "ds_sinistros", "fields": [{"name": "Tipo de Sinistro", "expression": "`Tipo de Sinistro`"}, {"name": "measure(Tempo Medio de Liquidacao)", "expression": "MEASURE(`Tempo Medio de Liquidacao`)"}], "disaggregated": false}}], "spec": {"version": 3, "widgetType": "bar", "frame": {"title": "Tempo médio de liquidação por tipo de sinistro (dias)", "showTitle": true}, "encodings": {"x": {"fieldName": "Tipo de Sinistro", "scale": {"type": "categorical"}, "displayName": "Tipo"}, "y": {"fieldName": "measure(Tempo Medio de Liquidacao)", "scale": {"type": "quantitative"}, "displayName": "Dias"}}}}, "position": {"x": 0, "y": 15, "width": 6, "height": 5}},
+
+        {"widget": {"name": "risco_fraude", "queries": [{"name": "main_query", "query": {"datasetName": "ds_sinistros", "fields": [{"name": "Nivel de Risco de Fraude", "expression": "`Nivel de Risco de Fraude`"}, {"name": "measure(Sinistros)", "expression": "MEASURE(`Sinistros`)"}], "disaggregated": false}}], "spec": {"version": 3, "widgetType": "bar", "frame": {"title": "Sinistros por nível de risco de fraude", "showTitle": true}, "encodings": {"x": {"fieldName": "Nivel de Risco de Fraude", "scale": {"type": "categorical"}, "displayName": "Nível de Risco"}, "y": {"fieldName": "measure(Sinistros)", "scale": {"type": "quantitative"}, "displayName": "Sinistros"}, "color": {"fieldName": "Nivel de Risco de Fraude", "scale": {"type": "categorical", "mappings": [{"value": "Alto", "color": "#FF7E5C"}, {"value": "Medio", "color": "#FFA600"}, {"value": "Baixo", "color": "#99DDB4"}]}}}}}, "position": {"x": 6, "y": 15, "width": 6, "height": 5}},
+
+        {"widget": {"name": "top_corretores", "queries": [{"name": "main_query", "query": {"datasetName": "ds_top_corretores", "fields": [{"name": "Corretor", "expression": "`Corretor`"}, {"name": "premio", "expression": "`premio`"}, {"name": "ativas", "expression": "`ativas`"}], "disaggregated": true}}], "spec": {"version": 2, "widgetType": "table", "frame": {"title": "Top 10 corretores por prêmio", "showTitle": true}, "encodings": {"columns": [{"fieldName": "Corretor", "displayName": "Corretor"}, {"fieldName": "premio", "displayName": "Prêmio mensal", "format": {"type": "number-currency", "currencyCode": "BRL", "decimalPlaces": {"type": "exact", "places": 2}}}, {"fieldName": "ativas", "displayName": "Apólices ativas"}]}}}, "position": {"x": 0, "y": 20, "width": 12, "height": 6}}
+      ]
+    },
+    {
+      "name": "filters",
+      "displayName": "Filtros",
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS",
+      "layoutVersion": "GRID_V1",
+      "layout": [
+        {"widget": {"name": "f_linha", "queries": [
+          {"name": "q_c", "query": {"datasetName": "ds_carteira", "fields": [{"name": "Linha de Negocio", "expression": "`Linha de Negocio`"}], "disaggregated": false}},
+          {"name": "q_a", "query": {"datasetName": "ds_arrecadacao", "fields": [{"name": "Linha de Negocio", "expression": "`Linha de Negocio`"}], "disaggregated": false}},
+          {"name": "q_s", "query": {"datasetName": "ds_sinistros", "fields": [{"name": "Linha de Negocio", "expression": "`Linha de Negocio`"}], "disaggregated": false}}
+        ], "spec": {"version": 2, "widgetType": "filter-multi-select", "frame": {"title": "Linha de Negócio", "showTitle": true}, "encodings": {"fields": [{"fieldName": "Linha de Negocio", "queryName": "q_c", "displayName": "Linha"}, {"fieldName": "Linha de Negocio", "queryName": "q_a"}, {"fieldName": "Linha de Negocio", "queryName": "q_s"}]}}}, "position": {"x": 0, "y": 0, "width": 4, "height": 2}},
+
+        {"widget": {"name": "f_regiao", "queries": [
+          {"name": "q_c", "query": {"datasetName": "ds_carteira", "fields": [{"name": "Regiao", "expression": "`Regiao`"}], "disaggregated": false}},
+          {"name": "q_a", "query": {"datasetName": "ds_arrecadacao", "fields": [{"name": "Regiao", "expression": "`Regiao`"}], "disaggregated": false}},
+          {"name": "q_s", "query": {"datasetName": "ds_sinistros", "fields": [{"name": "Regiao", "expression": "`Regiao`"}], "disaggregated": false}}
+        ], "spec": {"version": 2, "widgetType": "filter-multi-select", "frame": {"title": "Região", "showTitle": true}, "encodings": {"fields": [{"fieldName": "Regiao", "queryName": "q_c", "displayName": "Região"}, {"fieldName": "Regiao", "queryName": "q_a"}, {"fieldName": "Regiao", "queryName": "q_s"}]}}}, "position": {"x": 4, "y": 0, "width": 4, "height": 2}}
+      ]
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "canvasBackgroundColor": {"light": "#FCFCFC", "dark": "#1F272D"},
+      "widgetBackgroundColor": {"light": "#FFFFFF", "dark": "#11171C"},
+      "widgetBorderColor": {"light": "#FFFFFF", "dark": "#11171C"},
+      "fontColor": {"light": "#11171C", "dark": "#E8ECF0"},
+      "selectionColor": {"light": "#0072B2", "dark": "#8ACAFF"},
+      "visualizationColors": ["#0072B2", "#E69F00", "#009E73", "#CC79A7", "#56B4E9", "#D55E00", "#99DDB4"],
+      "widgetHeaderAlignment": "LEFT"
+    },
+    "genieSpace": {"isEnabled": true, "overrideId": "01f1ab9021281c98a4a183c6b5f80067", "enablementMode": "ENABLED"}
+  }
+}
