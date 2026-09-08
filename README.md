@@ -8,7 +8,7 @@
 
 Kit completo e reproduzível de um **workshop prático de Databricks AI/BI + Genie** para a indústria de **seguros** (Vida & Previdência, Sinistros & Fraude, Distribuição & Corretores). Inclui dados sintéticos, camada semântica governada (Metric Views), Domain, glossário, dois Genie Spaces, um dashboard AI/BI e a base para o **Genie Ontology** — além de um notebook guiado estilo *Databricks Academy* e o roteiro da demo.
 
-> Workshop de referência: **17/09** · **Sessão 2 (11h–13h) — trilha Usuário de Negócio** (a Sessão 1, 09h–11h, é Data Engineering / técnico). 2 horas, sem código para o público de negócio. Dados 100% sintéticos, criados apenas para treinamento.
+> Workshop de referência: **17/09**, dia inteiro em 2 sessões — **Sessão 1 (09h–11h) Data Engineering (técnico)**: constrói o pipeline medalhão Bronze→Silver→Gold; **Sessão 2 (11h–13h) Usuário de Negócio**: consome o Gold com AI/BI + Genie, sem código. Dados 100% sintéticos, criados apenas para treinamento.
 
 📐 **Arquitetura e modelo de dados:** [`docs/arquitetura.md`](docs/arquitetura.md) (diagramas Mermaid).
 
@@ -18,6 +18,9 @@ Kit completo e reproduzível de um **workshop prático de Databricks AI/BI + Gen
 
 | Componente | Onde | Descrição |
 |---|---|---|
+| **Sessão 1 · Data Engineering (notebook)** | [`notebooks/metlife_workshop_class_sessao1_dataeng.py`](notebooks/metlife_workshop_class_sessao1_dataeng.py) | Aula guiada: pipeline medalhão Bronze→Silver→Gold que aterrissa no catálogo |
+| **Pipeline medalhão (Lakeflow)** | [`pipelines/`](pipelines/) | Declarative Pipeline (SQL) produtivo — Auto Loader + expectations + Gold |
+| **Sessão 2 · Negócio (notebook)** | [`notebooks/metlife_workshop_class_sessao2_business.py`](notebooks/metlife_workshop_class_sessao2_business.py) | Aula guiada AI/BI + Genie (consome o Gold) |
 | **Notebook guiado (Academy)** | [`notebooks/metlife_workshop_demo.py`](notebooks/metlife_workshop_demo.py) | Reconstrói e explica todo o ambiente, com o **roteiro da demo** ao final |
 | **Dados sintéticos** | [`sql/00`–`sql/07`](sql/) | 7 tabelas de seguros geradas 100% em SQL |
 | **Camada semântica** | [`sql/10`–`sql/12`](sql/) | 3 Metric Views governados (carteira, arrecadação, sinistralidade) |
