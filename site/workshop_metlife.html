@@ -36,16 +36,23 @@
   .navlinks a:hover{color:var(--blue)}
   @media(max-width:720px){.navlinks{display:none}}
 
-  /* Hero banner (imagem) */
-  .herobanner{position:relative;line-height:0;background:#0a1f3a}
-  .herobanner img{width:100%;height:auto;max-height:560px;object-fit:cover;object-position:center 30%;display:block}
-  .herobanner::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:80px;background:linear-gradient(180deg,rgba(0,43,92,0),var(--navy))}
-
-  /* Hero (faixa-título) */
-  .hero{background:var(--grad-hero);color:#fff;position:relative;overflow:hidden}
-  .hero::after{content:"";position:absolute;right:-120px;top:-120px;width:420px;height:420px;border-radius:50%;
-    background:radial-gradient(circle at center, rgba(140,198,63,.45), transparent 65%)}
-  .hero .wrap{padding:40px 22px 56px;position:relative;z-index:2}
+  /* One-page hero: imagem + overlay */
+  .hero-full{position:relative;min-height:92vh;display:flex;align-items:flex-end;overflow:hidden;background:var(--navy);color:#fff}
+  .herobanner{position:absolute;inset:0;z-index:0;line-height:0}
+  .hero-parallax{position:absolute;inset:-9% 0;will-change:transform}
+  .hero-img{width:100%;height:100%;object-fit:cover;object-position:center 32%;display:block;animation:kenburns 24s ease-in-out infinite alternate}
+  @keyframes kenburns{from{transform:scale(1.02)}to{transform:scale(1.12)}}
+  .hero-full::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:linear-gradient(90deg, rgba(0,18,42,.90) 0%, rgba(0,18,42,.60) 34%, rgba(0,18,42,.10) 60%, rgba(0,18,42,0) 100%),
+               linear-gradient(0deg, rgba(0,18,42,.94) 0%, rgba(0,18,42,.35) 32%, rgba(0,18,42,0) 62%)}
+  .hero{background:transparent;position:relative;z-index:2;overflow:visible;width:100%}
+  .hero .wrap{padding:0 22px 68px;position:relative;z-index:2}
+  .hero .wrap>*{max-width:660px}
+  .hero h1{text-shadow:0 2px 18px rgba(0,10,30,.45)}
+  .scrollcue{position:absolute;left:50%;bottom:16px;z-index:3;color:#d8ecff;font-size:24px;text-decoration:none;animation:bob 1.9s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+  @media (prefers-reduced-motion:reduce){.hero-img,.scrollcue{animation:none}}
+  @media(max-width:720px){.hero-full{min-height:88vh}.hero-full::after{background:linear-gradient(0deg, rgba(0,18,42,.95) 0%, rgba(0,18,42,.5) 45%, rgba(0,18,42,.15) 100%)}}
   .logo-pill{display:inline-flex;align-items:center;gap:12px;background:#fff;padding:12px 20px;border-radius:999px;box-shadow:var(--shadow);margin-bottom:26px}
   .logo-pill img{height:34px;display:block}
   .logo-pill span{font-weight:700;color:var(--navy);font-size:14px;border-left:2px solid var(--line);padding-left:12px}
@@ -131,7 +138,15 @@
   footer .disc{max-width:640px;color:#9db8d6}
   .toolbar{position:fixed;right:18px;bottom:18px;z-index:60}
   .toolbar button{background:var(--navy);color:#fff;border:0;padding:12px 16px;border-radius:999px;font-weight:700;box-shadow:var(--shadow);cursor:pointer;font-size:13.5px}
-  @media print{.topbar,.toolbar,.navlinks{display:none}.hero{-webkit-print-color-adjust:exact;print-color-adjust:exact}section{padding:20px 0}}
+  @media print{
+    .topbar,.toolbar,.navlinks{display:none}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    /* Imagem como CAPA de página inteira */
+    .hero-full{min-height:100vh;height:100vh;break-after:page;page-break-after:always}
+    .hero-img{animation:none;transform:none}
+    .hero-parallax{transform:none;inset:0}
+    section{padding:20px 0}
+  }
 </style>
 </head>
 <body>
@@ -153,8 +168,9 @@
   </div>
 </div>
 
+<section class="hero-full">
 <div class="herobanner">
-  <img src="assets/hero_metlife.jpg" alt="MetLife × Databricks — Pessoas Mais Seguras Amanhã: dados que protegem vidas, IA para um futuro mais seguro">
+  <div class="hero-parallax"><img class="hero-img" src="assets/hero_metlife.jpg" alt="MetLife × Databricks — Pessoas Mais Seguras Amanhã: dados que protegem vidas, IA para um futuro mais seguro"></div>
 </div>
 
 <header class="hero">
@@ -178,6 +194,8 @@
     </div>
   </div>
 </header>
+  <a class="scrollcue" href="#objetivos" aria-label="Rolar para o conteúdo">▾</a>
+</section>
 
 <section id="objetivos">
   <div class="wrap">
@@ -371,6 +389,21 @@
   const obs=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){
     const id='#'+e.target.id; links.forEach(a=>a.style.color=a.getAttribute('href')===id?'var(--blue)':'');}});},{rootMargin:'-45% 0px -50% 0px'});
   secs.forEach(s=>s&&obs.observe(s));
+
+  // Parallax suave no hero (respeita prefers-reduced-motion)
+  const px=document.querySelector('.hero-parallax');
+  const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(px && !reduce){
+    let ticking=false;
+    addEventListener('scroll',()=>{
+      if(ticking) return; ticking=true;
+      requestAnimationFrame(()=>{
+        const y=window.scrollY;
+        if(y < window.innerHeight) px.style.transform='translateY('+(y*0.28).toFixed(1)+'px)';
+        ticking=false;
+      });
+    },{passive:true});
+  }
 </script>
 </body>
 </html>
