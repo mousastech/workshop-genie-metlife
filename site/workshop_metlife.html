@@ -304,10 +304,11 @@
 
     <div class="block">
       <div class="head"><span class="num">Bloco 5</span><span class="time">10h45–11h00</span><h3>Orquestração &amp; Governança · handoff</h3></div>
-      <p>Em produção, o medalhão é um <b>Lakeflow Declarative Pipeline</b> agendado por um <b>Job</b>, com <b>lineage</b> automático (bronze → silver → gold → Metric Views → Genie/dashboards) e <b>tags de Domain</b> no Gold — a mesma taxonomia da Sessão 2. O Gold entregue aqui é o insumo da Sessão 2.</p>
+      <p>O medalhão roda como um <b>Lakeflow Declarative Pipeline</b> (Auto Loader + expectations) orquestrado por um <b>Job</b>: a Task 1 atualiza Bronze→Silver→Gold e a Task 2, dependente, <b>atualiza o dashboard AI/BI</b> — dados e painel sempre <b>sincronizados</b>. Com <b>lineage</b> automático (bronze → silver → gold → Metric Views → Genie/dashboards) e <b>tags de Domain</b> no Gold. O ambiente do workshop já tem o pipeline e o Job provisionados.</p>
       <div class="links">
-        <a class="btn btn-primary" href="https://fevm-moi-ai.cloud.databricks.com/editor/notebooks/429109848936448?o=7474658545709121"><span class="em">📓</span> Notebook da Sessão 1</a>
-        <a class="btn btn-ghost" href="https://github.com/mousastech/workshop-genie-metlife/blob/main/pipelines/metlife_medallion.sql"><span class="em">🧱</span> Declarative Pipeline (SQL)</a>
+        <a class="btn btn-primary" href="https://fevm-moi-ai.cloud.databricks.com/pipelines/c8b22fb6-22a4-48b5-868e-c87dbcb45b8e?o=7474658545709121"><span class="em">🧱</span> Pipeline (Lakeflow) ao vivo</a>
+        <a class="btn btn-ghost" href="https://fevm-moi-ai.cloud.databricks.com/jobs/93737767044104?o=7474658545709121"><span class="em">🔄</span> Job de orquestração</a>
+        <a class="btn btn-ghost" href="https://fevm-moi-ai.cloud.databricks.com/editor/notebooks/429109848936448?o=7474658545709121"><span class="em">📓</span> Notebook da Sessão 1</a>
       </div>
     </div>
 
