@@ -10,9 +10,6 @@ bundle:
   name: metlife_workshop_tecnico
 
 variables:
-  sandbox_host:
-    description: URL do workspace sandbox do cliente
-    default: https://adb-0000000000000000.0.azuredatabricks.net
   warehouse_id:
     description: SQL warehouse serverless do sandbox (para tarefas SQL, se usadas)
     default: REPLACE_WAREHOUSE_ID
@@ -30,10 +27,12 @@ targets:
   dev:
     mode: development
     default: true
-    workspace:
-      host: ${var.sandbox_host}
-    # Em CI, a identidade vem do service principal (OAuth M2M) via env vars;
-    # localmente, do perfil do CLI. run_as segue a identidade que faz o deploy.
+    # O host do sandbox NÃO é fixado aqui de propósito — vem da autenticação do
+    # ambiente, para o mesmo bundle servir a qualquer workspace sandbox:
+    #   - local:  databricks bundle deploy -t dev --profile <sandbox>
+    #   - CI:     env DATABRICKS_HOST + DATABRICKS_CLIENT_ID/SECRET
+    #             (service principal OAuth M2M — ver ../azure-pipelines.yml)
+    # (Fixar workspace.host via ${var} NÃO resolve na checagem de auth do CLI.)
 
 resources:
   jobs:

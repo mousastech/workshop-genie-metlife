@@ -50,14 +50,14 @@ done
 
 ## CI/CD — Azure DevOps + Asset Bundles (Bloco 4)
 
-- `bundle/databricks.yml` — bundle com um job Gold-layer e target `dev` apontando para o sandbox (`${var.sandbox_host}`).
+- `bundle/databricks.yml` — bundle com um job Gold-layer e target `dev`. O **host do sandbox NÃO é fixado no bundle** (vem da autenticação do ambiente); assim o mesmo bundle serve a qualquer workspace.
 - `azure-pipelines.yml` — pipeline que instala o Databricks CLI e roda `bundle validate` (em PR) e `bundle deploy -t dev` (em push na `main`), autenticando por **service principal (OAuth M2M)**.
 
 Variáveis secretas do pipeline: `DATABRICKS_HOST`, `DATABRICKS_CLIENT_ID`, `DATABRICKS_CLIENT_SECRET`.
 
-Deploy manual (para demonstrar antes do CI): `cd sandbox/bundle && databricks bundle deploy -t dev`.
+Deploy manual (para demonstrar antes do CI): `cd sandbox/bundle && databricks bundle deploy -t dev --profile <sandbox>`. O host vem do `--profile` local; no CI, do env `DATABRICKS_HOST`.
 
-Ajuste em `databricks.yml`: `sandbox_host`, `warehouse_id`, `notebook_path` (aponte para o notebook Gold real — ex.: `notebooks/metlife_workshop_class_sessao1_dataeng.py` publicado no workspace).
+Ajuste em `databricks.yml`: `warehouse_id`, `catalog`, `gold_schema`, `notebook_path` (aponte para o notebook Gold real — ex.: `notebooks/metlife_workshop_class_sessao1_dataeng.py` publicado no workspace). **Nota:** fixar `workspace.host` via `${var}` não resolve na checagem de auth do CLI — por isso o host vem do profile/env.
 
 ---
 
