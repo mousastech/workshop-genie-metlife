@@ -1,0 +1,54 @@
+# ============================================================================
+# databricks.yml · Databricks Asset Bundle · MetLife Track Técnico (Bloco 4 CI/CD)
+# ----------------------------------------------------------------------------
+# Empacota um job Gold-layer e faz deploy no SANDBOX do cliente.
+# Deploy manual:   databricks bundle deploy -t dev
+# Deploy via CI:   Azure DevOps (../azure-pipelines.yml) autentica por
+#                  service principal (OAuth M2M) e roda validate + deploy.
+# ============================================================================
+bundle:
+  name: metlife_workshop_tecnico
+
+variables:
+  sandbox_host:
+    description: URL do workspace sandbox do cliente
+    default: https://adb-0000000000000000.0.azuredatabricks.net
+  warehouse_id:
+    description: SQL warehouse serverless do sandbox (para tarefas SQL, se usadas)
+    default: REPLACE_WAREHOUSE_ID
+  catalog:
+    description: Catálogo Gold no sandbox
+    default: metlife_sandbox
+  gold_schema:
+    description: Schema Gold no sandbox
+    default: workshop_gold
+  notebook_path:
+    description: Notebook Gold-layer a executar (caminho no workspace)
+    default: /Workspace/Shared/metlife/gold_refresh
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: ${var.sandbox_host}
+    # Em CI, a identidade vem do service principal (OAuth M2M) via env vars;
+    # localmente, do perfil do CLI. run_as segue a identidade que faz o deploy.
+
+resources:
+  jobs:
+    gold_refresh:
+      name: "[${bundle.target}] MetLife · Gold refresh (self-service)"
+      tags:
+        projeto: metlife-workshop
+        camada: gold
+      # Job serverless (sem cluster dedicado) — leve para o sandbox.
+      queue:
+        enabled: true
+      tasks:
+        - task_key: refresh_gold
+          notebook_task:
+            notebook_path: ${var.notebook_path}
+            base_parameters:
+              catalog: ${var.catalog}
+              gold_schema: ${var.gold_schema}

@@ -1,0 +1,60 @@
+# ============================================================================
+# azure-pipelines.yml · MetLife Track Técnico · Bloco 4 (CI/CD)
+# ----------------------------------------------------------------------------
+# Pipeline Azure DevOps que valida e implanta o Databricks Asset Bundle no
+# sandbox, autenticando por SERVICE PRINCIPAL (OAuth M2M).
+#
+# Fluxo GitFlow:
+#   - PR para main  -> valida o bundle (bundle validate)
+#   - push em main  -> valida + deploy no target dev (sandbox)
+#
+# Configure como VARIÁVEIS SECRETAS do pipeline (ou variable group):
+#   DATABRICKS_HOST           = https://adb-xxxx.azuredatabricks.net
+#   DATABRICKS_CLIENT_ID      = <application id do service principal>
+#   DATABRICKS_CLIENT_SECRET  = <secret OAuth do service principal>  (secreto)
+# O CLI usa OAuth M2M automaticamente quando HOST + CLIENT_ID + CLIENT_SECRET
+# estão presentes no ambiente.
+# ============================================================================
+trigger:
+  branches:
+    include:
+      - main
+
+pr:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  BUNDLE_DIR: sandbox/bundle
+
+steps:
+  - checkout: self
+
+  - script: |
+      curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+      databricks version
+    displayName: "Instalar Databricks CLI"
+
+  - script: |
+      cd "$(BUNDLE_DIR)"
+      databricks bundle validate -t dev
+    displayName: "Validar bundle"
+    env:
+      DATABRICKS_HOST: $(DATABRICKS_HOST)
+      DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
+      DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)
+
+  # Deploy só quando o código entra em main (não em PR).
+  - script: |
+      cd "$(BUNDLE_DIR)"
+      databricks bundle deploy -t dev
+    displayName: "Deploy bundle no sandbox (dev)"
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    env:
+      DATABRICKS_HOST: $(DATABRICKS_HOST)
+      DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
+      DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)
