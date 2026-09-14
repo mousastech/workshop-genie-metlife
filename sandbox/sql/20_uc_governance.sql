@@ -69,13 +69,22 @@ ALTER TABLE metlife_sandbox.workshop_gold.clientes
   ALTER COLUMN nome_cliente SET MASK metlife_sandbox.workshop_gold.mask_nome;
 
 -- 5b) Máscara numérica (financeiro): renda do cliente.
-CREATE OR REPLACE FUNCTION metlife_sandbox.workshop_gold.mask_valor(v DOUBLE)
+-- IMPORTANTE: a função de máscara precisa CASAR o tipo da coluna. Como
+-- clientes.renda_mensal é INT, usamos mask_renda(INT). (sinistros.valor_reclamado
+-- é DOUBLE e usa mask_valor(DOUBLE) em 5c.) Aplicar mask_valor(DOUBLE) numa
+-- coluna INT falha com erro de tipo.
+CREATE OR REPLACE FUNCTION metlife_sandbox.workshop_gold.mask_renda(v INT)
   RETURN CASE WHEN is_account_group_member('workshop_metlife_admin') THEN v
               ELSE NULL END;
 ALTER TABLE metlife_sandbox.workshop_gold.clientes
-  ALTER COLUMN renda_mensal SET MASK metlife_sandbox.workshop_gold.mask_valor;
+  ALTER COLUMN renda_mensal SET MASK metlife_sandbox.workshop_gold.mask_renda;
 
--- 5c) Máscara no valor reclamado de sinistros (reutiliza mask_valor).
+-- Função de máscara para valores DOUBLE (reutilizada em 5c):
+CREATE OR REPLACE FUNCTION metlife_sandbox.workshop_gold.mask_valor(v DOUBLE)
+  RETURN CASE WHEN is_account_group_member('workshop_metlife_admin') THEN v
+              ELSE NULL END;
+
+-- 5c) Máscara no valor reclamado de sinistros (DOUBLE -> mask_valor).
 ALTER TABLE metlife_sandbox.workshop_gold.sinistros
   ALTER COLUMN valor_reclamado SET MASK metlife_sandbox.workshop_gold.mask_valor;
 
