@@ -32,7 +32,7 @@ Este documento reúne (1) o **menu / programa**, (2) o **ambiente e acessos**, (
 - **Workspace:** [fevm-moi-ai.cloud.databricks.com](https://fevm-moi-ai.cloud.databricks.com/?o=7474658545709121)
 - **Genie Space (tabelas / exploração):** [MetLife - Seguros, Sinistros e Distribuicao](https://fevm-moi-ai.cloud.databricks.com/genie/rooms/01f1ab8ced4b1c7d88c2984cedb40565?o=7474658545709121)
 - **Genie Space (camada semântica / Metric Views):** [MetLife - Camada Semantica](https://fevm-moi-ai.cloud.databricks.com/genie/rooms/01f1ab9021281c98a4a183c6b5f80067?o=7474658545709121)
-- **Dashboard AI/BI de referência:** [MetLife - Painel de Seguros](https://fevm-moi-ai.cloud.databricks.com/sql/dashboardsv3/01f1ab91baf51017b6a24adc9a23888e/published?o=7474658545709121)
+- **Dashboard AI/BI de referência:** [MetLife - Painel de Seguros](https://fevm-moi-ai.cloud.databricks.com/dashboardsv3/01f1ab91baf51017b6a24adc9a23888e/published?o=7474658545709121)
 - **Catálogo / schema dos dados:** `moi_ai_catalog.metlife_workshop`
 
 Nenhuma instalação é necessária — tudo roda no navegador. As bases, os Metric Views e os Genie Spaces já estão prontos; começamos a perguntar desde o primeiro minuto.
@@ -83,7 +83,7 @@ Além disso: **glossário de negócio certificado** (`glossario_negocio`, 13 ter
 
 **Desafio (opcional):** adicione um widget de **prêmio médio por segmento de cliente** cruzando com a tabela `clientes` (dica: adicione `clientes` em *Data* e relacione por `cliente_id`).
 
-> **Gabarito visual:** o [Dashboard AI/BI de referência](https://fevm-moi-ai.cloud.databricks.com/sql/dashboardsv3/01f1ab91baf51017b6a24adc9a23888e/published?o=7474658545709121) mostra como fica um painel completo sobre os Metric Views (KPIs, prêmio por região, arrecadação mensal, sinistros/fraude e top corretores), com botão "Ask Genie" integrado.
+> **Gabarito visual:** o [Dashboard AI/BI de referência](https://fevm-moi-ai.cloud.databricks.com/dashboardsv3/01f1ab91baf51017b6a24adc9a23888e/published?o=7474658545709121) mostra como fica um painel completo sobre os Metric Views (KPIs, prêmio por região, arrecadação mensal, sinistros/fraude e top corretores), com botão "Ask Genie" integrado.
 
 ### Laboratório B — Primeira conversa no Genie (Bloco 3)
 

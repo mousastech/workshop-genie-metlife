@@ -500,7 +500,7 @@
 # MAGIC
 # MAGIC 🧑‍🏫 Um dashboard **AI/BI** é montado sobre datasets do Unity Catalog, com KPIs, gráficos e filtros — **sem código**. Vamos primeiro ver um pronto e depois construir o seu.
 # MAGIC
-# MAGIC ▶️ **Referência:** abra o **[Dashboard AI/BI de referência](https://fevm-moi-ai.cloud.databricks.com/sql/dashboardsv3/01f1ab91baf51017b6a24adc9a23888e/published?o=7474658545709121)** — KPIs, prêmio por região, arrecadação mensal, sinistros/fraude e top corretores, com botão *Ask Genie*.
+# MAGIC ▶️ **Referência:** abra o **[Dashboard AI/BI de referência](https://fevm-moi-ai.cloud.databricks.com/dashboardsv3/01f1ab91baf51017b6a24adc9a23888e/published?o=7474658545709121)** — KPIs, prêmio por região, arrecadação mensal, sinistros/fraude e top corretores, com botão *Ask Genie*.
 # MAGIC
 # MAGIC ## 🧪 Lab A — Seu primeiro dashboard
 # MAGIC 1. Menu lateral → **Dashboards** → **Create dashboard**.
@@ -697,7 +697,7 @@
 # MAGIC 5. Eleger **1 domínio piloto** e **3–5 perguntas de alto valor** para uma prova de conceito acompanhada.
 # MAGIC
 # MAGIC ## 📌 Recapitulando
-# MAGIC - **[Dashboard AI/BI](https://fevm-moi-ai.cloud.databricks.com/sql/dashboardsv3/01f1ab91baf51017b6a24adc9a23888e/published?o=7474658545709121)**
+# MAGIC - **[Dashboard AI/BI](https://fevm-moi-ai.cloud.databricks.com/dashboardsv3/01f1ab91baf51017b6a24adc9a23888e/published?o=7474658545709121)**
 # MAGIC - **[Genie · tabelas](https://fevm-moi-ai.cloud.databricks.com/genie/rooms/01f1ab8ced4b1c7d88c2984cedb40565?o=7474658545709121)** · **[Genie · camada semântica](https://fevm-moi-ai.cloud.databricks.com/genie/rooms/01f1ab9021281c98a4a183c6b5f80067?o=7474658545709121)**
 # MAGIC - Repositório com todo o material: `github.com/mousastech/workshop-genie-metlife`
 # MAGIC

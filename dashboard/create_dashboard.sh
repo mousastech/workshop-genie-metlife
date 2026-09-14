@@ -29,4 +29,4 @@ DASHBOARD_ID=$(databricks lakeview create \
 
 echo "DASHBOARD_ID=$DASHBOARD_ID"
 databricks lakeview publish "$DASHBOARD_ID" --warehouse-id "$WAREHOUSE_ID" --profile "$PROFILE"
-echo "Publicado. Link: <host>/sql/dashboardsv3/$DASHBOARD_ID/published"
+echo "Publicado. Link: <host>/dashboardsv3/$DASHBOARD_ID/published"
