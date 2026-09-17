@@ -1,28 +1,28 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # 🎓 MetLife — AI/BI + Genie · Aula guiada (estilo Databricks Academy)
-# MAGIC ### Sessão 2 · **Databricks para Usuário de Negócio** · 11h00–13h00 (BRA)
+# MAGIC ### Sessão 1 · **Databricks para Usuário de Negócio** · 09h00–11h00 (BRA)
 # MAGIC
 # MAGIC Bem-vindo(a)! Este notebook **é a aula**: um passo a passo sequencial que acompanha a **agenda** e conduz você da plataforma ao **Genie** e ao **Genie Ontology**, usando dados de **seguros** (Vida & Previdência, Sinistros & Fraude, Distribuição).
 # MAGIC
-# MAGIC > 📅 **Contexto do dia:** Sessão 1 (09h–11h) — *Databricks para Usuário Técnico / Data Engineering*. **Sessão 2 (11h–13h) — esta aula, para Usuário de Negócio.** Foco em **autoatendimento sem código**: dashboards e perguntas em linguagem natural. Os trechos de SQL neste notebook são o **gabarito do instrutor** (bastidores) — como participante, você trabalha nas telas do **Dashboard** e do **Genie**.
+# MAGIC > 📅 **Contexto do dia:** **Sessão 1 (09h–11h) — esta aula, para Usuário de Negócio.** Sessão 2 (11h–13h) — *Databricks para Usuário Técnico / Data Engineering*. Foco em **autoatendimento sem código**: dashboards e perguntas em linguagem natural. Os trechos de SQL neste notebook são o **gabarito do instrutor** (bastidores) — como participante, você trabalha nas telas do **Dashboard** e do **Genie**.
 # MAGIC
 # MAGIC ## 🗓️ Agenda (2h)
 # MAGIC
 # MAGIC | Horário | Bloco | Nesta aula |
 # MAGIC |---|---|---|
-# MAGIC | 11h00–11h10 | **1 · Abertura e visão de AI/BI para seguros** | contexto + tour rápido |
-# MAGIC | 11h10–11h40 | **2 · Dashboards AI/BI** (mão na massa) | Lab A — seu primeiro dashboard |
-# MAGIC | 11h40–12h20 | **3 · Genie — conversa em linguagem natural** (mão na massa) | Lab B — perguntar e confiar |
-# MAGIC | 12h20–12h45 | **4 · Genie confiável — curadoria e camada semântica** | Labs C e E |
-# MAGIC | 12h45–12h55 | **5 · Casos de uso MetLife** | Lab D — fraude, distribuição, persistência |
-# MAGIC | 12h55–13h00 | **6 · Encerramento e próximos passos** | jornada de adoção |
+# MAGIC | 09h00–09h10 | **1 · Abertura e visão de AI/BI para seguros** | contexto + tour rápido |
+# MAGIC | 09h10–09h40 | **2 · Dashboards AI/BI** (mão na massa) | Lab A — seu primeiro dashboard |
+# MAGIC | 09h40–10h20 | **3 · Genie — conversa em linguagem natural** (mão na massa) | Lab B — perguntar e confiar |
+# MAGIC | 10h20–10h45 | **4 · Genie confiável — curadoria e camada semântica** | Labs C e E |
+# MAGIC | 10h45–10h55 | **5 · Casos de uso MetLife** | Lab D — fraude, distribuição, persistência |
+# MAGIC | 10h55–11h00 | **6 · Encerramento e próximos passos** | jornada de adoção |
 # MAGIC
 # MAGIC ## 🎯 Objetivos de aprendizagem
 # MAGIC Ao final você será capaz de: navegar a plataforma; **construir um dashboard AI/BI** sem código; **conversar com o Genie** e interpretar as respostas; e entender o que torna a resposta *confiável* (instruções, sinônimos, **Metric Views**, **Domain**, **glossário**) e como isso alimenta o **Genie Ontology**.
 # MAGIC
 # MAGIC ## 👥 Como usar
-# MAGIC - **Instrutor(a):** execute a **Parte 0 (preparação)** *antes* da aula (ou reaproveite o ambiente da Sessão 1). Conduza bloco a bloco pelo relógio.
+# MAGIC - **Instrutor(a):** execute a **Parte 0 (preparação)** *antes* da aula — ela é standalone e cria todo o ambiente em ~1–2 min no serverless. Conduza bloco a bloco pelo relógio.
 # MAGIC - **Participante (negócio):** você **não precisa escrever SQL**. Siga os laboratórios nas telas do Dashboard e do Genie. Ícones: 🧑‍🏫 explicação · ▶️ o instrutor executa (gabarito) · 🧪 laboratório (você faz) · ✅ checkpoint.
 # MAGIC
 # MAGIC > **Ambiente:** workspace `fevm-moi-ai` · catálogo `moi_ai_catalog.metlife_workshop`. Dados 100% sintéticos, só para treinamento.
@@ -464,7 +464,7 @@
 # MAGIC %md
 # MAGIC ---
 # MAGIC # 🕘 Bloco 1 · Abertura e a visão de AI/BI para seguros
-# MAGIC **11h00–11h10**
+# MAGIC **09h00–09h10**
 # MAGIC
 # MAGIC 🧑‍🏫 **A ideia central.** Áreas de negócio vivem esperando relatórios. **AI/BI + Genie** invertem isso: qualquer pessoa faz perguntas em **linguagem natural** sobre dados **governados** e recebe tabelas, gráficos e o **SQL** por trás — com a segurança do Unity Catalog.
 # MAGIC
@@ -496,7 +496,7 @@
 # MAGIC %md
 # MAGIC ---
 # MAGIC # 🕘 Bloco 2 · Dashboards AI/BI — mão na massa
-# MAGIC **11h10–11h40**
+# MAGIC **09h10–09h40**
 # MAGIC
 # MAGIC 🧑‍🏫 Um dashboard **AI/BI** é montado sobre datasets do Unity Catalog, com KPIs, gráficos e filtros — **sem código**. Vamos primeiro ver um pronto e depois construir o seu.
 # MAGIC
@@ -531,7 +531,7 @@
 # MAGIC %md
 # MAGIC ---
 # MAGIC # 🕘 Bloco 3 · Genie — primeira conversa
-# MAGIC **11h40–12h20**
+# MAGIC **09h40–10h20**
 # MAGIC
 # MAGIC 🧑‍🏫 O **Genie** traduz perguntas em **linguagem natural** para **SQL governado**. Você lê a resposta, o gráfico e — importante — **o SQL gerado**.
 # MAGIC
@@ -573,15 +573,8 @@
 
 # MAGIC %md
 # MAGIC ---
-# MAGIC # ☕ Intervalo · 11h30–12h30
-# MAGIC Retornamos às 12h30 com **curadoria, camada semântica e Genie Ontology**.
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ---
 # MAGIC # 🕘 Bloco 4 · Genie a fundo — curadoria, camada semântica e Ontology
-# MAGIC **12h20–12h45**
+# MAGIC **10h20–10h45**
 # MAGIC
 # MAGIC 🧑‍🏫 Por que o Genie responde bem aqui? Por causa da **curadoria** e da **camada semântica governada**. Este é o coração do **Genie Ontology**.
 # MAGIC
@@ -658,7 +651,7 @@
 # MAGIC %md
 # MAGIC ---
 # MAGIC # 🕘 Bloco 5 · Casos de uso MetLife
-# MAGIC **12h45–12h55**
+# MAGIC **10h45–10h55**
 # MAGIC
 # MAGIC ## 🧪 Lab D — Escolha um trilho e pergunte no Genie
 # MAGIC **D1 · Sinistros e fraude** — *"Qual o tempo médio de liquidação por tipo?"* · *"Quantos sinistros com suspeita de fraude e qual o valor reclamado?"*
@@ -687,7 +680,7 @@
 # MAGIC %md
 # MAGIC ---
 # MAGIC # 🕘 Bloco 6 · Encerramento e jornada de adoção
-# MAGIC **12h55–13h00**
+# MAGIC **10h55–11h00**
 # MAGIC
 # MAGIC 🧑‍🏫 **Do workshop à produção:**
 # MAGIC 1. Conectar os dados reais da MetLife no Unity Catalog.
