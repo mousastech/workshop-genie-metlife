@@ -8,9 +8,11 @@
 
 Kit completo e reproduzível de um **workshop prático de Databricks AI/BI + Genie** para a indústria de **seguros** (Vida & Previdência, Sinistros & Fraude, Distribuição & Corretores). Inclui dados sintéticos, camada semântica governada (Metric Views), Domain, glossário, dois Genie Spaces, um dashboard AI/BI e a base para o **Genie Ontology** — além de um notebook guiado estilo *Databricks Academy* e o roteiro da demo.
 
-> Workshop de referência: **17/09**, dia inteiro em 2 sessões — **Sessão 1 (09h–11h) Data Engineering (técnico)**: constrói o pipeline medalhão Bronze→Silver→Gold; **Sessão 2 (11h–13h) Usuário de Negócio**: consome o Gold com AI/BI + Genie, sem código. Dados 100% sintéticos, criados apenas para treinamento.
+> Workshop de referência: **17/09**, dia inteiro em 2 sessões — **Sessão 1 (09h–11h) Usuário de Negócio**: AI/BI + Genie sobre o Gold, sem código; **Sessão 2 (11h–13h) Usuário Técnico**: [Track Técnico](site/workshop_metlife_tecnico.html) no sandbox do cliente (governança UC, CI/CD, Delta Sharing, ML e Apps, com o Gold já populado). O build do medalhão Bronze→Silver→Gold está no notebook-apêndice [`metlife_workshop_appendix_build_gold.py`](notebooks/metlife_workshop_appendix_build_gold.py). Dados 100% sintéticos, criados apenas para treinamento.
 
 📐 **Arquitetura e modelo de dados:** [`docs/arquitetura.md`](docs/arquitetura.md) (diagramas Mermaid).
+
+🚀 **Quer reproduzir sem custo?** Guia de deploy no **Databricks Free Edition** (clonando do Git, tudo pela UI, sem CLI): [`docs/deploy_free_edition.md`](docs/deploy_free_edition.md).
 
 ---
 
@@ -18,7 +20,7 @@ Kit completo e reproduzível de um **workshop prático de Databricks AI/BI + Gen
 
 | Componente | Onde | Descrição |
 |---|---|---|
-| **Sessão 1 · Data Engineering (notebook)** | [`notebooks/metlife_workshop_class_sessao1_dataeng.py`](notebooks/metlife_workshop_class_sessao1_dataeng.py) | Aula guiada: pipeline medalhão Bronze→Silver→Gold que aterrissa no catálogo |
+| **Apêndice · Build do Gold (notebook)** | [`notebooks/metlife_workshop_appendix_build_gold.py`](notebooks/metlife_workshop_appendix_build_gold.py) | Recurso opcional: pipeline medalhão Bronze→Silver→Gold que aterrissa no catálogo (seed do Gold) |
 | **Pipeline medalhão (Lakeflow)** | [`pipelines/`](pipelines/) | Declarative Pipeline (SQL) produtivo — Auto Loader + expectations + Gold |
 | **Orquestração (Job)** | [`jobs/`](jobs/) | Job: pipeline → treino do modelo → refresh do dashboard (sincronizados) |
 | **ML — modelo de fraude** | [`notebooks/metlife_ml_fraude_treino.py`](notebooks/metlife_ml_fraude_treino.py) | GBT (Spark MLlib) + MLflow → Unity Catalog Model Registry |
@@ -26,7 +28,7 @@ Kit completo e reproduzível de um **workshop prático de Databricks AI/BI + Gen
 | **App OmniPulse AI (flagship)** | [`apps/metlife_omnipulse/`](apps/metlife_omnipulse/) | React+FastAPI+Lakebase · 3 módulos (Fast-Claims, Churn Shield, BrokerX) + AI Gateway |
 | **App Odonto — Cotação (WhatsApp)** | [`apps/metlife_odonto/`](apps/metlife_odonto/) | Cotação conversacional (simulador WhatsApp) → Lakebase → melhor plano; /webhook p/ fase 2 |
 | **Databricks App** | [`apps/metlife_triagem/`](apps/metlife_triagem/) | App de triagem de sinistros + governança AI Gateway |
-| **Sessão 2 · Negócio (notebook)** | [`notebooks/metlife_workshop_class_sessao2_business.py`](notebooks/metlife_workshop_class_sessao2_business.py) | Aula guiada AI/BI + Genie (consome o Gold) |
+| **Sessão 1 · Negócio (notebook)** | [`notebooks/metlife_workshop_class_sessao1_business.py`](notebooks/metlife_workshop_class_sessao1_business.py) | Aula guiada AI/BI + Genie (consome o Gold) |
 | **Notebook guiado (Academy)** | [`notebooks/metlife_workshop_demo.py`](notebooks/metlife_workshop_demo.py) | Reconstrói e explica todo o ambiente, com o **roteiro da demo** ao final |
 | **Dados sintéticos** | [`sql/00`–`sql/07`](sql/) | 7 tabelas de seguros geradas 100% em SQL |
 | **Camada semântica** | [`sql/10`–`sql/12`](sql/) | 3 Metric Views governados (carteira, arrecadação, sinistralidade) |

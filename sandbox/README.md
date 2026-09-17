@@ -57,7 +57,7 @@ Variáveis secretas do pipeline: `DATABRICKS_HOST`, `DATABRICKS_CLIENT_ID`, `DAT
 
 Deploy manual (para demonstrar antes do CI): `cd sandbox/bundle && databricks bundle deploy -t dev --profile <sandbox>`. O host vem do `--profile` local; no CI, do env `DATABRICKS_HOST`.
 
-Ajuste em `databricks.yml`: `warehouse_id`, `catalog`, `gold_schema`, `notebook_path` (aponte para o notebook Gold real — ex.: `notebooks/metlife_workshop_class_sessao1_dataeng.py` publicado no workspace). **Nota:** fixar `workspace.host` via `${var}` não resolve na checagem de auth do CLI — por isso o host vem do profile/env.
+Ajuste em `databricks.yml`: `warehouse_id`, `catalog`, `gold_schema`, `notebook_path` (aponte para o notebook Gold real — ex.: `notebooks/metlife_workshop_appendix_build_gold.py` publicado no workspace). **Nota:** fixar `workspace.host` via `${var}` não resolve na checagem de auth do CLI — por isso o host vem do profile/env.
 
 ---
 

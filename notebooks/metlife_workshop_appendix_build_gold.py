@@ -1,34 +1,33 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC # 🛠️ MetLife — Data Engineering na Databricks · Aula guiada (Sessão 1)
-# MAGIC ### Sessão 1 · **Usuário Técnico / Data Engineering** · 09h00–11h00 (BRA)
+# MAGIC # 🛠️ MetLife — Data Engineering na Databricks · Apêndice (build do Gold)
+# MAGIC ### Apêndice opcional · **Build do Gold** — Data Engineering (medalhão de ponta a ponta)
 # MAGIC
-# MAGIC Nesta sessão construímos, do zero, o **pipeline medalhão** (Bronze → Silver → Gold) que **aterrissa os dados no catálogo** consumido pela Sessão 2 (negócio, AI/BI + Genie). Você verá ingestão, qualidade, modelagem dimensional, orquestração e governança — tudo no Unity Catalog.
+# MAGIC Este notebook constrói, do zero, o **pipeline medalhão** (Bronze → Silver → Gold) que **aterrissa os dados no catálogo** consumido pela **sessão de negócio** (AI/BI + Genie). Você verá ingestão, qualidade, modelagem dimensional, orquestração e governança — tudo no Unity Catalog.
 # MAGIC
-# MAGIC > 📅 **O dia em duas sessões:** **Sessão 1 (09h–11h) — Data Engineering (esta aula).** Sessão 2 (11h–13h) — Usuário de Negócio: AI/BI + Genie sobre o **Gold** que produzirmos aqui.
+# MAGIC > 📌 **Como usar este material.** É um **recurso opcional/de preparação** — serve para *seedar* o Gold e para quem quer ver o medalhão construído do zero. A **sessão técnica ao vivo** do workshop é o **[Track Técnico dedicado](https://mousastech.github.io/workshop-genie-metlife/site/workshop_metlife_tecnico.html)** (sandbox do cliente, com o Gold já populado, governança UC, CI/CD, Delta Sharing, ML e Apps). Sem horário fixo — rode sob demanda.
 # MAGIC
-# MAGIC ## 🗓️ Agenda (2h)
+# MAGIC ## 🗓️ Roteiro (6 blocos)
 # MAGIC
-# MAGIC | Horário | Bloco | Nesta aula |
-# MAGIC |---|---|---|
-# MAGIC | 09h00–09h10 | **1 · Arquitetura Lakehouse & medalhão** | Unity Catalog, Lakeflow, schema + Volume |
-# MAGIC | 09h10–09h35 | **2 · Ingestão (Bronze)** | Auto Loader / `read_files` / COPY INTO → Bronze cru |
-# MAGIC | 09h35–10h05 | **3 · Transformação (Silver → Gold)** | tipagem, dedup, qualidade + dimensões e fatos |
-# MAGIC | 10h05–10h30 | **4 · Preparação de Dados & Machine Learning** | features + treinar modelo, orquestrado após o pipeline |
-# MAGIC | 10h30–10h50 | **5 · Databricks Apps & AI Gateway** | criar um app e governar o consumo de IA |
-# MAGIC | 10h50–11h00 | **6 · Orquestração & Governança** | Job (pipeline→treino→dashboard), lineage, tags · handoff |
+# MAGIC | Bloco | Nesta parte |
+# MAGIC |---|---|
+# MAGIC | **1 · Arquitetura Lakehouse & medalhão** | Unity Catalog, Lakeflow, schema + Volume |
+# MAGIC | **2 · Ingestão (Bronze)** | Auto Loader / `read_files` / COPY INTO → Bronze cru |
+# MAGIC | **3 · Transformação (Silver → Gold)** | tipagem, dedup, qualidade + dimensões e fatos |
+# MAGIC | **4 · Preparação de Dados & Machine Learning** | features + treinar modelo, orquestrado após o pipeline |
+# MAGIC | **5 · Databricks Apps & AI Gateway** | criar um app e governar o consumo de IA |
+# MAGIC | **6 · Orquestração & Governança** | Job (pipeline→treino→dashboard), lineage, tags · handoff |
 # MAGIC
 # MAGIC ## 🎯 Objetivos
-# MAGIC Ao final você será capaz de: desenhar a arquitetura medalhão no Unity Catalog; ingerir dados brutos com **Auto Loader**; aplicar **qualidade de dados** e tipagem no Silver; modelar **dimensões e fatos** no Gold; e orquestrar/governar o pipeline com **Lakeflow** — entregando o Gold que a Sessão 2 consome.
+# MAGIC Ao final você será capaz de: desenhar a arquitetura medalhão no Unity Catalog; ingerir dados brutos com **Auto Loader**; aplicar **qualidade de dados** e tipagem no Silver; modelar **dimensões e fatos** no Gold; e orquestrar/governar o pipeline com **Lakeflow** — entregando o Gold que a sessão de negócio consome.
 # MAGIC
-# MAGIC > **Ambiente:** origem (simulada) em `moi_ai_catalog.metlife_workshop` · medalhão construído em `moi_ai_catalog.metlife_medallion`. Não alteramos os objetos da Sessão 2.
+# MAGIC > **Ambiente:** origem (simulada) em `moi_ai_catalog.metlife_workshop` · medalhão construído em `moi_ai_catalog.metlife_medallion`. Não alteramos os objetos da sessão de negócio.
 
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC ---
 # MAGIC # 🕘 Bloco 1 · Arquitetura Lakehouse & medalhão
-# MAGIC **09h00–09h10**
 # MAGIC
 # MAGIC 🧑‍🏫 **Medalhão (Bronze → Silver → Gold)** é o padrão de refino progressivo:
 # MAGIC - **Bronze** — dado cru, fiel à origem (schema flexível, histórico de ingestão).
@@ -43,7 +42,7 @@
 
 # MAGIC %sql
 # MAGIC CREATE SCHEMA IF NOT EXISTS moi_ai_catalog.metlife_medallion
-# MAGIC   COMMENT 'Sessao 1 (Data Engineering) - medalhao que alimenta metlife_workshop';
+# MAGIC   COMMENT 'Apendice (build do Gold / Data Engineering) - medalhao que alimenta metlife_workshop';
 # MAGIC CREATE VOLUME IF NOT EXISTS moi_ai_catalog.metlife_medallion.landing
 # MAGIC   COMMENT 'Landing zone (arquivos brutos das origens)';
 
@@ -52,7 +51,6 @@
 # MAGIC %md
 # MAGIC ---
 # MAGIC # 🕘 Bloco 2 · Ingestão — camada Bronze
-# MAGIC **09h10–09h35**
 # MAGIC
 # MAGIC 🧑‍🏫 Em produção, o Bronze é alimentado por **Auto Loader** (ingestão incremental de arquivos que chegam num Volume/cloud storage), por **COPY INTO** (batch idempotente) ou por conectores/streaming. Padrões:
 # MAGIC
@@ -155,7 +153,6 @@
 # MAGIC %md
 # MAGIC ---
 # MAGIC # 🕘 Bloco 3 · Transformação — Silver → Gold
-# MAGIC **09h35–10h05**
 # MAGIC
 # MAGIC 🧑‍🏫 No Silver aplicamos **tipagem**, **padronização de categorias**, **deduplicação** e **qualidade de dados**. Numa Declarative Pipeline, a qualidade é declarativa com **expectations**:
 # MAGIC
@@ -268,7 +265,7 @@
 
 # MAGIC %md
 # MAGIC ### 3.2 · Promoção a Gold — dimensões e fatos
-# MAGIC O **Gold** é o modelo de negócio: **dimensões** conformadas e **fatos** prontos para BI/IA, preservando as dimensões que os analistas filtram (linha, canal, região, produto, tempo) — exatamente o conjunto que a **Sessão 2** consome via Metric Views, Genie e dashboards. Promovemos o Silver a Gold adicionando colunas derivadas (faixa de capital, mês de competência).
+# MAGIC O **Gold** é o modelo de negócio: **dimensões** conformadas e **fatos** prontos para BI/IA, preservando as dimensões que os analistas filtram (linha, canal, região, produto, tempo) — exatamente o conjunto que a **sessão de negócio** consome via Metric Views, Genie e dashboards. Promovemos o Silver a Gold adicionando colunas derivadas (faixa de capital, mês de competência).
 
 # COMMAND ----------
 
@@ -312,7 +309,6 @@
 # MAGIC %md
 # MAGIC ---
 # MAGIC # 🕘 Bloco 4 · Preparação de Dados & Machine Learning
-# MAGIC **10h05–10h30**
 # MAGIC
 # MAGIC 🧑‍🏫 Com o **Gold** pronto, preparamos *features* e treinamos um modelo de **propensão a fraude em sinistros** — classificação binária que gera um **score de risco** para **priorizar a fila de investigação**. Temos o rótulo `suspeita_fraude` no Gold.
 # MAGIC
@@ -376,7 +372,6 @@ with mlflow.start_run(run_name="fraude_gbt"):
 # MAGIC %md
 # MAGIC ---
 # MAGIC # 🕘 Bloco 5 · Databricks Apps & AI Gateway
-# MAGIC **10h30–10h50**
 # MAGIC
 # MAGIC 🧑‍🏫 **Databricks Apps** permite publicar aplicações web (FastAPI, Streamlit, Dash…) **dentro do Databricks**, com identidade e governança do Unity Catalog — sem infra externa. Vamos criar um app de **triagem de sinistros** que lê o Gold e chama o **modelo de fraude** para ranquear casos.
 # MAGIC
@@ -399,23 +394,22 @@ with mlflow.start_run(run_name="fraude_gbt"):
 # MAGIC - **Payload logging** (inference tables) para auditoria.
 # MAGIC - **Guardrails** (PII, tópicos) e **fallbacks** entre modelos.
 # MAGIC
-# MAGIC Assim, o consumo de IA do app fica **rastreável, seguro e com custo controlado** — o mesmo padrão que governa o Genie na Sessão 2.
+# MAGIC Assim, o consumo de IA do app fica **rastreável, seguro e com custo controlado** — o mesmo padrão que governa o Genie na sessão de negócio.
 
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC ---
-# MAGIC # 🕘 Bloco 6 · Orquestração & Governança · handoff para a Sessão 2
-# MAGIC **10h50–11h00**
+# MAGIC # 🕘 Bloco 6 · Orquestração & Governança · handoff para a sessão de negócio
 # MAGIC
 # MAGIC 🧑‍🏫 **Orquestração (Lakeflow Job).** Um único **Job** encadeia o dia: **Task 1** roda o Declarative Pipeline (Bronze→Silver→Gold); ao concluir, **Task 2** re-treina o modelo de fraude e **Task 3** atualiza o **dashboard AI/BI** — dados, modelo e painel sempre **sincronizados**. Artefatos no repositório: `pipelines/` e `jobs/`.
 # MAGIC
-# MAGIC **Governança (Unity Catalog).** Tags de domínio no Gold (mesma taxonomia da Sessão 2), **lineage** automático (bronze → silver → gold → modelo/Metric Views → Genie/dashboards) e **AI Gateway** no consumo de IA.
+# MAGIC **Governança (Unity Catalog).** Tags de domínio no Gold (mesma taxonomia da sessão de negócio), **lineage** automático (bronze → silver → gold → modelo/Metric Views → Genie/dashboards) e **AI Gateway** no consumo de IA.
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC -- Governança: tags de domínio no Gold (alinhado à Sessão 2)
+# MAGIC -- Governança: tags de domínio no Gold (alinhado à sessão de negócio)
 # MAGIC ALTER SCHEMA moi_ai_catalog.metlife_medallion SET TAGS ('dominio_negocio'='Seguros MetLife', 'camada'='gold');
 # MAGIC ALTER TABLE moi_ai_catalog.metlife_medallion.gold_apolices  SET TAGS ('dominio_negocio'='Seguros MetLife','camada'='gold','area_negocio'='Carteira e Distribuicao');
 # MAGIC ALTER TABLE moi_ai_catalog.metlife_medallion.gold_premios   SET TAGS ('dominio_negocio'='Seguros MetLife','camada'='gold','area_negocio'='Arrecadacao');
@@ -424,12 +418,12 @@ with mlflow.start_run(run_name="fraude_gbt"):
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### 🔗 Handoff para a Sessão 2
-# MAGIC O **Gold** aqui construído (dimensões + fatos) é exatamente o formato que a **Sessão 2** consome. No ambiente do workshop, a camada curada de negócio vive em **`moi_ai_catalog.metlife_workshop`**, sobre a qual já existem os **Metric Views**, o **Domain**, o **glossário**, os **2 Genie Spaces** e o **Dashboard AI/BI**.
+# MAGIC ### 🔗 Handoff para a sessão de negócio
+# MAGIC O **Gold** aqui construído (dimensões + fatos) é exatamente o formato que a **sessão de negócio** consome. No ambiente do workshop, a camada curada de negócio vive em **`moi_ai_catalog.metlife_workshop`**, sobre a qual já existem os **Metric Views**, o **Domain**, o **glossário**, os **2 Genie Spaces** e o **Dashboard AI/BI**.
 # MAGIC
 # MAGIC **Fluxo do dia inteiro:**
 # MAGIC `origens → Bronze → Silver → Gold  →  Metric Views (semântica)  →  Genie + Dashboards (negócio)`
 # MAGIC
-# MAGIC ✅ **Encerramento.** Você construiu um pipeline medalhão governado, com ingestão, qualidade, modelagem e orquestração — pronto para a Sessão 2 transformar em autoatendimento analítico.
+# MAGIC ✅ **Encerramento.** Você construiu um pipeline medalhão governado, com ingestão, qualidade, modelagem e orquestração — pronto para a sessão de negócio transformar em autoatendimento analítico.
 # MAGIC
 # MAGIC > **Apêndice — Declarative Pipeline:** veja `pipelines/metlife_medallion.sql` no repositório para a versão produtiva (Auto Loader + `EXPECT`), e `pipelines/README.md` para deploy via Lakeflow.

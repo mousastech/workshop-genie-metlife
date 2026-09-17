@@ -2,7 +2,7 @@
 
 `metlife_medallion.sql` é a versão **produtiva** do medalhão da Sessão 1: Bronze (Auto Loader) → Silver (com *expectations* de qualidade) → Gold (dimensões e fatos), publicando em `moi_ai_catalog.metlife_medallion`. O Gold é o formato que a **Sessão 2** consome.
 
-> Para a aula guiada e executável célula a célula, use o notebook `notebooks/metlife_workshop_class_sessao1_dataeng.py` (constrói o mesmo medalhão em SQL batch). Este pipeline é a forma orquestrada/produtiva.
+> Para a aula guiada e executável célula a célula, use o notebook `notebooks/metlife_workshop_appendix_build_gold.py` (constrói o mesmo medalhão em SQL batch). Este pipeline é a forma orquestrada/produtiva.
 
 ## Pré-requisitos
 - Volume de landing com os CSVs das origens:
